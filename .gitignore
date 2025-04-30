@@ -28,4 +28,7 @@ __pycache__/
 # Data files
 /data/
 
+# Result plots
+/figures/
+
 
