@@ -1,6 +1,7 @@
 #include "neutron.hpp"
 #include "basematerial.hpp"
 #include "regularslab.hpp"
+#include "sphere.hpp"
 #include <iostream>
 #include <fstream>
 #include <random>
@@ -61,7 +62,9 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    std::cout << static_cast<double>(NumAbsorbed)/NumberSims << " " << static_cast<double>(NumReflected)/NumberSims << " " << static_cast<double>(NumTransmitted)/NumberSims << std::endl;
+    std::cout << static_cast<double>(NumAbsorbed)/NumberSims 
+    << " " << static_cast<double>(NumReflected)/NumberSims 
+    << " " << static_cast<double>(NumTransmitted)/NumberSims << std::endl;
     
     return 0;
 }

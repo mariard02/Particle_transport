@@ -1,0 +1,17 @@
+{
+    "run": {
+        "run_name": "name",
+        "simulations": 1000
+    },
+
+
+    "material": {
+        "lambda": 0.5, 
+        "pabs": 0.05,
+        "k": 0.01
+    },
+
+    "geometry": {
+        "shape": "regular_slab"
+    }
+}
