@@ -1,7 +1,19 @@
 #!/bin/zsh
 
-# Leer el archivo JSON
-json_file="config.json"
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 config.json" >&2
+  exit 1
+fi
+
+json_file="$1"
+
+# Verificar que el archivo existe
+if [ ! -f "$json_file" ]; then
+  echo "Error: The file '$json_file' does not exist." >&2
+  exit 1
+fi
+
+# Leer el contenido del archivo
 json_data=$(cat "$json_file")
 
 variables_needed=(
