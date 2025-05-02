@@ -7,7 +7,7 @@
 
     "material": {
         "lambda": 0.5, 
-        "pabs": 0.05,
+        "pabs": 0.1,
         "k": 0.01
     },
 

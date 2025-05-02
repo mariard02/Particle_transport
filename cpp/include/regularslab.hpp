@@ -16,6 +16,7 @@ public:
     virtual ~RegularSlab() = default;
 
     bool isWithinBounds(const Neutron& particle) const override;
+    
 };
 
 #endif

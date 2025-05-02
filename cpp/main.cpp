@@ -8,9 +8,10 @@
 
 int main(int argc, char* argv[]) {
     if (argc != 5) {
-        std::cerr << "Usage: " << argv[0] << " <lambda> <pabs> <k> <lenght>\n";
+        std::cerr << "Usage: " << argv[0] << " <lambda> <pabs> <k> <length>\n";
         return 1;
     }
+
     double lambda = std::atof(argv[1]);
     double pabs = std::atof(argv[2]);
     double k = std::atof(argv[3]);
@@ -28,11 +29,13 @@ int main(int argc, char* argv[]) {
     int NumReflected = 0;
     int NumTransmitted = 0;
 
-    for (int i = 0; i < NumberSims; i++){
+    for (int i = 0; i < NumberSims; i++) {
         Neutron n(0.0, 0.0, 0.0, 0.5, 0.0, 0.0);
         bool absorbed = false;
+        bool entered = false;
 
         while (mat.isWithinBounds(n)) {
+            entered = true;
             if (n.getAbsorption(mat)) {
                 absorbed = true;
                 break;
@@ -40,11 +43,9 @@ int main(int argc, char* argv[]) {
             n.propagate(mat);
         }
 
-        auto pos = n.getPosition();
-
         if (absorbed) {
             NumAbsorbed++;
-        } else if (pos[0] < 0.0) {
+        } else if (!entered) {
             NumReflected++;
         } else {
             NumTransmitted++;
@@ -53,18 +54,19 @@ int main(int argc, char* argv[]) {
         if (absorbed && !saved_absorbed) {
             n.saveHistoryToFile("../data/hist_absorbed.txt");
             saved_absorbed = true;
-        } else if (pos[0] < 0.0 && !saved_reflected) {
+        } else if (!entered && !saved_reflected) {
             n.saveHistoryToFile("../data/hist_reflected.txt");
             saved_reflected = true;
-        } else if (pos[0] > mat.getLength() && !saved_transmitted) {
+        } else if (entered && !absorbed && !saved_transmitted) {
             n.saveHistoryToFile("../data/hist_transmitted.txt");
             saved_transmitted = true;
         }
     }
 
-    std::cout << static_cast<double>(NumAbsorbed)/NumberSims 
-    << " " << static_cast<double>(NumReflected)/NumberSims 
-    << " " << static_cast<double>(NumTransmitted)/NumberSims << std::endl;
-    
+    std::cout << static_cast<double>(NumAbsorbed) / NumberSims
+              << " " << static_cast<double>(NumReflected) / NumberSims
+              << " " << static_cast<double>(NumTransmitted) / NumberSims
+              << std::endl;
+
     return 0;
 }
