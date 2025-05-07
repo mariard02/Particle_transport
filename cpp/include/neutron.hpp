@@ -6,6 +6,8 @@
 #include <string> 
 #include "basematerial.hpp"
 
+class DoubleSlab;
+
 class Neutron {
     private:
         std::array<double, 3> position;
@@ -32,9 +34,12 @@ class Neutron {
 
         std::array<double, 3> getThermalStep(const BaseMaterial& material);
 
-        void propagate(const BaseMaterial& material);
+        void elasticScatter(const BaseMaterial&  material);
 
-        bool getAbsorption(const BaseMaterial& material);
+        void propagate(const BaseMaterial&  material);
+        void propagate(const DoubleSlab doubleSlab);
+
+        bool getAbsorption(const BaseMaterial&  material);
 
 };
 

@@ -3,5 +3,5 @@
 
 bool RegularSlab::isWithinBounds(const  Neutron& particle) const {
     double x = particle.getPosition()[0];
-    return x >= 0.0 && x <= length;
+    return x >= xinit && x <= length + xinit;
 }

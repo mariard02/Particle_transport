@@ -8,10 +8,13 @@ protected:
     double lambda;
     double pabs;
     double k;
+    double atomicMass;
 
 public:
-    BaseMaterial(double lambda, double pabs, double k)
-        : lambda(lambda), pabs(pabs), k(k) {}
+    BaseMaterial(double lambda, double pabs, double k, double atomicMass = -1.0)
+        : lambda(lambda), pabs(pabs), k(k), atomicMass(atomicMass) {}
+
+    BaseMaterial() : lambda(0.0), pabs(0.0), k(0.0), atomicMass(-1.0) {}
 
     virtual ~BaseMaterial() = default;
 
@@ -20,6 +23,9 @@ public:
     double getK() const { return k; }
 
     virtual bool isWithinBounds(const Neutron& particle) const = 0;
+
+    bool hasElasticScattering() const { return atomicMass > 0.0; }
+    double getAtomicMass() const { return atomicMass; }
 };
 
 #endif

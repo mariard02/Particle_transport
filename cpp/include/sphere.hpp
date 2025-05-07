@@ -10,8 +10,8 @@ private:
     std::array<double, 3> center;
 
 public:
-    Sphere(double lambda, double pabs, double k, double radius, double x, double y, double z)
-        : BaseMaterial(lambda, pabs, k), radius(radius), center{x, y, z} {}
+    Sphere(double lambda, double pabs, double k, double radius, double atomicMass = -1.0)
+        : BaseMaterial(lambda, pabs, k, atomicMass), radius(radius) {}
 
     double getRadius() const {return radius;}
     const std::array<double, 3> getCenter() const { return center; }

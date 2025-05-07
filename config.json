@@ -1,17 +1,27 @@
 {
     "run": {
-        "run_name": "name",
+        "run_name": "run2",
         "simulations": 1000
     },
 
 
     "material": {
-        "lambda": 0.5, 
+        "mean_free_path": 0.5, 
         "pabs": 0.1,
         "k": 0.01
     },
 
     "geometry": {
-        "shape": "regular_slab"
+        "shape": "regular_slab",
+        "x_init" : 0.0
+    },
+
+    "particle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "vx": 0.5,
+        "vy": 0.0,
+        "vz": 0.0
     }
 }

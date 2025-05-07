@@ -7,64 +7,16 @@ fi
 
 json_file="$1"
 
-# Verificar que el archivo existe
-if [ ! -f "$json_file" ]; then
-  echo "Error: The file '$json_file' does not exist." >&2
-  exit 1
-fi
-
-# Leer el contenido del archivo
-json_data=$(cat "$json_file")
-
-variables_needed=(
-  "run.run_name"
-  "run.simulations"
-  "material.lambda"
-  "material.pabs"
-  "material.k"
-  "geometry.shape"
-)
-
-variables_opcionales=(
-  "run.simulations"
-  "material.pabs"
-  "material.k"
-)
-
-assign_variables() {
-  local key=$1
-  local needed=$2
-  local var_name="${key##*.}"
-
-  if echo "$json_data" | jq -e ".${key}" > /dev/null 2>&1; then
-    eval "${var_name}=\$(echo \"\$json_data\" | jq -r \".${key}\")"
-    return 0
-  else
-    if [[ "$needed" == "true" ]]; then
-      echo "✗ Error: '${key}' is not defined." >&2
-      return 1
-    else
-      return 0
-    fi
-  fi
-}
-
-for key in "${variables_needed[@]}"; do
-  if ! assign_variables "$key" "true"; then
-    exit 1
-  fi
-done
-
-for key in "${variables_opcionales[@]}"; do
-  assign_variables "$key" "false"
-done
+run_name=$(jq -r '.run.run_name' "$json_file")
+output_dir="$(pwd)/out/$run_name/data"
+mkdir -p "$output_dir"
 
 cd cpp
 
-output_file="../data/simulations_output.txt"
-echo "Length (L) Absorbed Reflected Transmitted" > "$output_file" 
+output_file="$output_dir/simulations_output.txt"
+echo "Length (L) Absorbed std Reflected std Transmitted std" > "$output_file" 
 
-g++ -std=c++11 -Iinclude main.cpp src/*.cpp -o simulation
+g++ -std=c++11 -Iinclude main.cpp src/*.cpp -o simulation 
 
 if [ $? -ne 0 ]; then
   echo "Compilation failed. Aborting."
@@ -72,7 +24,7 @@ if [ $? -ne 0 ]; then
 fi
 
 for L in {1..10}; do
-    output=$(./simulation "$lambda" "$pabs" "$k" "$L")
+    output=$(./simulation ../$json_file $L)
     echo "$L $output" >> "$output_file"
 done
 
@@ -80,4 +32,4 @@ rm simulation
 
 cd .. 
 
-python3 plot_particle_transport.py --lambda "$lambda" --pabs "$pabs" --k "$k"
+python3 plot_particle_transport.py --configuration $json_file 
