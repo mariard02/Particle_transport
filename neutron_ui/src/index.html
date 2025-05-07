@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Formulario Electron</title>
+    <link rel="stylesheet" href="index.css" />
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Formulario</h1>
+
+    <form id="config-form">
+      <label>Run name:
+        <input type="text" id="run_name" required />
+      </label><br />
+
+      <label>Simulations:
+        <input type="number" id="simulations" required />
+      </label><br />
+
+      <label>Shape:
+        <select id="shape" required>
+          <option value="">-- Chose an option --</option>
+          <option value="regular_slab">Regular Slab</option>
+          <option value="finite_slab">Finite Slab</option>
+          <option value="sphere">Sphere</option>
+          <option value="double">Double Slab (two materials)</option>
+        </select>
+      </label><br />
+
+      <!-- Additional fields -->
+      <div id="slab-options" class="hidden">
+        <label>Minimum slab thickness:
+          <input type="number" id="min_slab_thickness" step="0.01" />
+        </label><br />
+        <label>Maximum slab thickness:
+          <input type="number" id="max_slab_thickness" step="0.01" />
+        </label><br />
+        <label>Position of the slab:
+          <input type = "number" id="slab_position" stup = "0.01" /> 
+        </label><br />
+        <label>Mean free path:
+          <input type = "number" id = "mean_free_path" step = "0.01" />
+        </label><br />
+        <label>Probability of absorption:
+          <input type = "number" step = "0.01" id = "pabs" />
+        </label><br />
+        <label>Drag force:
+          <input type="number" step="0.01" id="k" />
+        </label><br />
+      </div>
+
+      <div id="sphere-options" class="hidden">
+        <label>Minimum sphere radius:
+          <input type="number" id="sphere_radius" step="0.01" />
+        </label><br />
+        <label>Maximum sphere radius:
+          <input type="number" id="sphere_radius" step="0.01" />
+        </label><br />
+        <label>Mean free path:
+          <input type = "number" id = "mean_free_path" step = "0.01" />
+        </label><br />
+        <label>Probability of absorption:
+          <input type = "number" step = "0.01" id = "pabs" />
+        </label><br />
+        <label>Drag force:
+          <input type="number" step="0.01" id="k" />
+        </label><br />
+      </div>
+
+      <div id="finite-slab-options" class="hidden">
+        <label>Length in the x axis:
+          <input type="number" id="x_length" step="0.01" />
+        </label><br />
+        <label>Length in the y axis:
+          <input type="number" id="y_length" step="0.01" />
+        </label><br />
+        <label>Minimum length in the z axis:
+          <input type="number" id="min_length" step="0.01" />
+        </label><br />
+        <label>Maximum length in the z axis:
+          <input type="number" id="max_length" step="0.01" />
+        </label><br />
+        <label>Mean free path:
+          <input type = "number" id = "mean_free_path" step = "0.01" />
+        </label><br />
+        <label>Probability of absorption:
+          <input type = "number" step = "0.01" id = "pabs" />
+        </label><br />
+        <label>Drag force:
+          <input type="number" step="0.01" id="k" />
+        </label><br />
+      </div>
+
+      <div id="double-slab-options" class="hidden">
+        <label>Total thickness:
+          <input type="number" id="total_length" step="0.01" />
+        </label><br />
+        <label>Minimum ratio:
+          <input type="number" id="min_ratio" step="0.01" />
+        </label><br />
+        <label>Maximum ratio:
+          <input type="number" id="max_ratio" step="0.01" />
+        </label><br />
+        <label>Position of the slab:
+          <input type = "number" id="slab_position" stup = "0.01" /> 
+        </label><br />
+        <label>Mean free path in first material:
+          <input type = "number" id = "mean_free_path1" step = "0.01" />
+        </label><br />
+        <label>Probability of absorption in first material:
+          <input type = "number" step = "0.01" id = "pabs1" />
+        </label><br />
+        <label>Drag force in first material:
+          <input type="number" step="0.01" id="k1" />
+        </label><br />
+        <label>Mean free path in second material:
+          <input type = "number" id = "mean_free_path2" step = "0.01" />
+        </label><br />
+        <label>Probability of absorption in second material:
+          <input type = "number" step = "0.01" id = "pabs2" />
+        </label><br />
+        <label>Drag force in second material:
+          <input type="number" step="0.01" id="k2" />
+        </label><br />
+      </div>
+    
+      <button type="submit" id="submit-button" disabled>Run simulations</button>
+    </form>
+
+    <script>
+      const form = document.getElementById('config-form');
+      const button = document.getElementById('submit-button');
+
+      const shapeSelect = document.getElementById('shape');
+      const slabOptions = document.getElementById('slab-options');
+      const sphereOptions = document.getElementById('sphere-options');
+      const finiteSlabOptions = document.getElementById('finite-slab-options');
+      const doubleSlabOptions = document.getElementById('double-slab-options')
+
+      shapeSelect.addEventListener('change', () => {
+        slabOptions.classList.add('hidden');
+        sphereOptions.classList.add('hidden');
+        finiteSlabOptions.classList.add('hidden');
+        doubleSlabOptions.classList.add('hidden');
+
+        if (shapeSelect.value === 'regular_slab') {
+          slabOptions.classList.remove('hidden');
+        } else if (shapeSelect.value === 'sphere') {
+          sphereOptions.classList.remove('hidden');
+        } else if (shapeSelect.value === 'finite_slab') {
+          finiteSlabOptions.classList.remove('hidden');
+        } else if (shapeSelect.value === 'double') {
+          doubleSlabOptions.classList.remove('hidden')
+        }
+
+        button.disabled = !form.checkValidity();
+      });
+
+      form.addEventListener('input', () => {
+        button.disabled = !form.checkValidity();
+      });
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const shape = shapeSelect.value;
+
+        const data = {
+          run: {
+            run_name: document.getElementById('run_name').value,
+            simulations: parseInt(document.getElementById('simulations').value),
+          },
+          material: {
+
+          },
+          geometry: {
+            shape: shape,
+          },
+        };
+
+        if (shape === 'regular_slab') {
+          data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
+          data.material.pabs = parseFloat(document.getElementById('pabs').value);
+          data.material.k = parseFloat(document.getElementById('k').value);
+          data.geometry.min_slab_thickness = parseFloat(document.getElementById('min_slab_thickness').value);
+          data.geometry.max_slab_thickness = parseFloat(document.getElementById('max_slab_thickness').value);
+        } else if (shape === 'sphere') {
+          data.geometry.radius = parseFloat(document.getElementById('sphere_radius').value);
+        } else if (shape === 'custom') {
+          data.geometry.file = document.getElementById('custom_file').value;
+        }
+
+        await window.electronAPI.saveConfig(data);
+      });
+    </script>
+  </body>
+</html>
