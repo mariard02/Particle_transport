@@ -2,7 +2,7 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f4f7fc;
   margin: 0;
-  padding: 0;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,20 +24,21 @@ h1 {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
-  padding-left: 30px; /* Agregar margen izquierdo a todo el formulario */
+  padding-left: 30px;
 }
 
 form {
   width: 100%;
+  align-content: center;
 }
 
 label {
-  display: block;
+  display: flex;
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: bold;
   color: #666;
-  margin-left: 10px; /* Agregar margen izquierdo a los labels */
+  margin-left: 10px; 
 }
 
 input,
@@ -50,7 +51,7 @@ button {
   border: 1px solid #ddd;
   font-size: 16px;
   margin-bottom: 20px;
-  margin-left: 10px; /* Agregar margen izquierdo a los inputs/select */
+  margin-left: 10px;
 }
 
 input:focus,
@@ -65,6 +66,7 @@ button {
   color: white;
   border: none;
   cursor: pointer;
+  margin: auto;
 }
 
 button:disabled {
@@ -78,4 +80,13 @@ button:hover {
 
 .hidden {
   display: none;
+}
+
+.identifier {
+  width: 20%;
+  min-width: 150px;
+}
+
+.geometry-properties {
+  display: flex;
 }

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import argparse
+import shutil
 import json
 import os
 
@@ -112,14 +113,11 @@ def main():
     data = json.load(f)
     output_dir = f'out/{data["run"]["run_name"]}'
     os.makedirs(output_dir, exist_ok=True)
-
-    # Cargar los datos del archivo de simulación con las desviaciones estándar
+    shutil.copy(args.configuration, output_dir)
     L, absorbed, absorbed_std, reflected, reflected_std, transmitted, transmitted_std = load_simulation_data(f'out/{data["run"]["run_name"]}/data/simulations_output.txt')
 
-    # Crear el gráfico de probabilidades con barras de error
     plot_probabilities(L, absorbed, absorbed_std, reflected, reflected_std, transmitted, transmitted_std, data, output_dir)
 
-    # Crear los gráficos de trayectorias
     plot_trajectories(data, output_dir)
 
 if __name__ == "__main__":

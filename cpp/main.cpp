@@ -92,6 +92,7 @@ int main(int argc, char* argv[]) {
         DoubleSlab mat(lambda1, pabs1, k1, lambda2, pabs2, k2, totalLength, xinit, length);
 
     } else {
+        std::cerr << "ERROR. Geometry not suported." << std::endl;
         return 1;
     }
 
@@ -116,6 +117,12 @@ int main(int argc, char* argv[]) {
 
         for (int i = 0; i < NumberSims; i++) {
             Neutron n(x0, y0, z0, vx, vy, vz);
+
+            if (!mat.isWithinBounds(n)) {
+                std::cerr << "ERROR. The neutron starts the simulation outside the material." << std::endl;
+                return 2;
+            }
+
             bool absorbed = false;
             bool reflected = false;
 

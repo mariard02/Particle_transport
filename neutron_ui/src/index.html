@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Formulario Electron</title>
+    <title>Particle Transport Simulation</title>
     <link rel="stylesheet" href="index.css" />
     <style>
       .hidden {
@@ -11,18 +11,18 @@
     </style>
   </head>
   <body>
-    <h1>Formulario</h1>
+    <h1>Configuration</h1>
 
     <form id="config-form">
-      <label>Run name:
+      <label><div class="identifier">Run name:</div>
         <input type="text" id="run_name" required />
       </label><br />
 
-      <label>Simulations:
+      <label><div class="identifier">Number of simulations:</div>
         <input type="number" id="simulations" required />
       </label><br />
 
-      <label>Shape:
+      <label><div class="identifier">Shape:</div>
         <select id="shape" required>
           <option value="">-- Chose an option --</option>
           <option value="regular_slab">Regular Slab</option>
@@ -34,102 +34,102 @@
 
       <!-- Additional fields -->
       <div id="slab-options" class="hidden">
-        <label>Minimum slab thickness:
+        <label><div class="identifier">Minimum slab thickness:</div>
           <input type="number" id="min_slab_thickness" step="0.01" />
         </label><br />
-        <label>Maximum slab thickness:
+        <label><div class="identifier">Maximum slab thickness:</div>
           <input type="number" id="max_slab_thickness" step="0.01" />
         </label><br />
-        <label>Position of the slab:
-          <input type = "number" id="slab_position" stup = "0.01" /> 
+        <label><div class="identifier">Position of the slab:</div>
+          <input type = "number" id="slab_position" step = "0.01" /> 
         </label><br />
-        <label>Mean free path:
+        <label><div class="identifier">Mean free path:</div>
           <input type = "number" id = "mean_free_path" step = "0.01" />
         </label><br />
-        <label>Probability of absorption:
+        <label><div class="identifier">Probability of absorption:</div>
           <input type = "number" step = "0.01" id = "pabs" />
         </label><br />
-        <label>Drag force:
+        <label><div class="identifier">Drag force:</div>
           <input type="number" step="0.01" id="k" />
         </label><br />
       </div>
 
       <div id="sphere-options" class="hidden">
-        <label>Minimum sphere radius:
-          <input type="number" id="sphere_radius" step="0.01" />
+        <label><div class="identifier">Minimum sphere radius:</div>
+          <input type="number" id="min_sphere_radius" step="0.01" />
         </label><br />
-        <label>Maximum sphere radius:
-          <input type="number" id="sphere_radius" step="0.01" />
+        <label><div class="identifier">Maximum sphere radius:</div>
+          <input type="number" id="max_sphere_radius" step="0.01" />
         </label><br />
-        <label>Mean free path:
+        <label><div class="identifier">Mean free path:</div>
           <input type = "number" id = "mean_free_path" step = "0.01" />
         </label><br />
-        <label>Probability of absorption:
+        <label><div class="identifier">Probability of absorption:</div>
           <input type = "number" step = "0.01" id = "pabs" />
         </label><br />
-        <label>Drag force:
+        <label><div class="identifier">Drag force:</div>
           <input type="number" step="0.01" id="k" />
         </label><br />
       </div>
 
       <div id="finite-slab-options" class="hidden">
-        <label>Length in the x axis:
+        <label><div class="identifier">Length in the x axis:</div>
           <input type="number" id="x_length" step="0.01" />
         </label><br />
-        <label>Length in the y axis:
+        <label><div class="identifier">Lenght in the y axis:</div>
           <input type="number" id="y_length" step="0.01" />
         </label><br />
-        <label>Minimum length in the z axis:
+        <label><div class="identifier">Minimum lenght in the z axis:</div>
           <input type="number" id="min_length" step="0.01" />
         </label><br />
-        <label>Maximum length in the z axis:
+        <label><div class="identifier">Maximum length in the z axis:</div>
           <input type="number" id="max_length" step="0.01" />
         </label><br />
-        <label>Mean free path:
+        <label><div class="identifier">Mean free path:</div>
           <input type = "number" id = "mean_free_path" step = "0.01" />
         </label><br />
-        <label>Probability of absorption:
+        <label><div class="identifier">Probability of absorption</div>
           <input type = "number" step = "0.01" id = "pabs" />
         </label><br />
-        <label>Drag force:
+        <label><div class="identifier">Drag force:</div>
           <input type="number" step="0.01" id="k" />
         </label><br />
       </div>
 
       <div id="double-slab-options" class="hidden">
-        <label>Total thickness:
+        <label><div class="identifier">Total thickness:</div>
           <input type="number" id="total_length" step="0.01" />
         </label><br />
-        <label>Minimum ratio:
+        <label><div class="identifier">Minimum ratio:</div>
           <input type="number" id="min_ratio" step="0.01" />
         </label><br />
-        <label>Maximum ratio:
+        <label><div class="identifier">Maximum ratio:</div>
           <input type="number" id="max_ratio" step="0.01" />
         </label><br />
-        <label>Position of the slab:
+        <label><div class="identifier">Position of the slab:</div>
           <input type = "number" id="slab_position" stup = "0.01" /> 
         </label><br />
-        <label>Mean free path in first material:
+        <label><div class = "identifier">Mean free path in first material:</div>
           <input type = "number" id = "mean_free_path1" step = "0.01" />
         </label><br />
-        <label>Probability of absorption in first material:
+        <label><div class="identifier">Probability of absorption in first material:</div>
           <input type = "number" step = "0.01" id = "pabs1" />
         </label><br />
-        <label>Drag force in first material:
+        <label><div class="identifier">Drag force in first material:</div>
           <input type="number" step="0.01" id="k1" />
         </label><br />
-        <label>Mean free path in second material:
+        <label><div class="identifier">Mean free path in second material:</div>
           <input type = "number" id = "mean_free_path2" step = "0.01" />
         </label><br />
-        <label>Probability of absorption in second material:
+        <label><div class="identifier">Probability of absorption in second material:</div>
           <input type = "number" step = "0.01" id = "pabs2" />
         </label><br />
-        <label>Drag force in second material:
+        <label><div class="identifier">Drag force in second material:</div>
           <input type="number" step="0.01" id="k2" />
         </label><br />
       </div>
     
-      <button type="submit" id="submit-button" disabled>Run simulations</button>
+      <button type="submit" id="submit-button" disabled>Save configuration</button>
     </form>
 
     <script>
@@ -189,10 +189,34 @@
           data.material.k = parseFloat(document.getElementById('k').value);
           data.geometry.min_slab_thickness = parseFloat(document.getElementById('min_slab_thickness').value);
           data.geometry.max_slab_thickness = parseFloat(document.getElementById('max_slab_thickness').value);
+          data.geometry.x_init = parseFloat(document.getElementById('slab_position').value)
         } else if (shape === 'sphere') {
-          data.geometry.radius = parseFloat(document.getElementById('sphere_radius').value);
-        } else if (shape === 'custom') {
-          data.geometry.file = document.getElementById('custom_file').value;
+          data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
+          data.material.pabs = parseFloat(document.getElementById('pabs').value);
+          data.material.k = parseFloat(document.getElementById('k').value);
+          data.geometry.min_sphere_radius = parseFloat(document.getElementById('min_sphere_radius').value)
+          data.geometry.max_sphere_radius = parseFloat(document.getElementById('max_sphere_radius').value)
+        } else if (shape === 'finite_slab') {
+          data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
+          data.material.pabs = parseFloat(document.getElementById('pabs').value);
+          data.material.k = parseFloat(document.getElementById('k').value);
+          data.geometry.x_length = parseFloat(document.getElementById('x_length').value);
+          data.geometry.y_length = parseFloat(document.getElementById('y_length').value);
+          data.geometry.min_length = parseFloat(document.getElementById('min_lenght').value);
+          data.geometry.max_length = parseFloat(document.getElementById('max_length').value);
+        } else if (shape === 'double_slab') {
+          data.geometry.total_length = parseFloat(document.getElementById('total_length').value);
+          data.geometry.min_ratio = parseFloat(document.getElementById('min_ratio').value);
+          data.geometry.max_ratio = parseFloat(document.getElementById('max_ratio').value);
+          data.geometry.x_init = parseFloat(document.getElementById('slab_position').value);
+
+          data.material.mean_free_path1 = parseFloat(document.getElementById('mean_free_path1').value);
+          data.material.mean_free_path2 = parseFloat(document.getElementById('mean_free_path2').value);
+          data.material.pabs1 = parseFloat(document.getElementById('pabs1').value);
+          data.material.pabs2 = parseFloat(document.getElementById('pabs2').value);
+          data.material.k1 = parseFloat(document.getElementById('k1').value);
+          data.material.k2 = parseFloat(document.getElementById('k2').value);
+
         }
 
         await window.electronAPI.saveConfig(data);
