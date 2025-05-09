@@ -8,9 +8,29 @@
 #include <fstream>
 #include <random>
 #include <cmath>
+#include <vector>
+#include <string>
 #include "json.hpp"
 
 using json = nlohmann::json;
+
+struct ConfigError {
+    std::vector<std::string> errors;
+    
+    void add_error(const std::string& error) {
+        errors.push_back(error);
+    }
+    
+    bool has_errors() const {
+        return !errors.empty();
+    }
+    
+    void print_errors() const {
+        for (const auto& err : errors) {
+            std::cerr << err << std::endl;
+        }
+    }
+};
 
 double compute_mean(const std::vector<double>& values) {
     double sum = 0.0;
@@ -22,6 +42,67 @@ double compute_stddev(const std::vector<double>& values, double mean) {
     double sum = 0.0;
     for (double v : values) sum += (v - mean) * (v - mean);
     return std::sqrt(sum / values.size());
+}
+
+void check_json_field(const json& j, const std::string& path, ConfigError& error) {
+    if (j.is_null()) {
+        error.add_error("Error: Required configuration value '" + path + "' is null or missing");
+    }
+}
+
+void validate_config(const json& config, ConfigError& error) {
+    check_json_field(config["run"], "run", error);
+    check_json_field(config["run"]["simulations"], "run.simulations", error);
+    check_json_field(config["run"]["run_name"], "run.run_name", error);
+    check_json_field(config["geometry"], "geometry", error);
+    check_json_field(config["geometry"]["shape"], "geometry.shape", error);
+    check_json_field(config["particle"], "particle", error);
+    check_json_field(config["particle"]["x"], "particle.x", error);
+    check_json_field(config["particle"]["y"], "particle.y", error);
+    check_json_field(config["particle"]["z"], "particle.z", error);
+    check_json_field(config["particle"]["vx"], "particle.vx", error);
+    check_json_field(config["particle"]["vy"], "particle.vy", error);
+    check_json_field(config["particle"]["vz"], "particle.vz", error);
+
+    if (!config["geometry"]["shape"].is_null()) {
+        std::string shape = config["geometry"]["shape"];
+        
+        if (shape == "regular_slab") {
+            check_json_field(config["material"], "material", error);
+            check_json_field(config["material"]["mean_free_path"], "material.mean_free_path", error);
+            check_json_field(config["material"]["pabs"], "material.pabs", error);
+            check_json_field(config["material"]["k"], "material.k", error);
+            check_json_field(config["geometry"]["x_init"], "geometry.x_init", error);
+        }
+        else if (shape == "sphere") {
+            check_json_field(config["material"], "material", error);
+            check_json_field(config["material"]["mean_free_path"], "material.mean_free_path", error);
+            check_json_field(config["material"]["pabs"], "material.pabs", error);
+            check_json_field(config["material"]["k"], "material.k", error);
+        }
+        else if (shape == "finite_slab") {
+            check_json_field(config["material"], "material", error);
+            check_json_field(config["material"]["mean_free_path"], "material.mean_free_path", error);
+            check_json_field(config["material"]["pabs"], "material.pabs", error);
+            check_json_field(config["material"]["k"], "material.k", error);
+            check_json_field(config["geometry"]["x_length"], "geometry.x_length", error);
+            check_json_field(config["geometry"]["y_length"], "geometry.y_length", error);
+        }
+        else if (shape == "double_slab") {
+            check_json_field(config["material"], "material", error);
+            check_json_field(config["material"]["mean_free_path_1"], "material.mean_free_path_1", error);
+            check_json_field(config["material"]["pabs_1"], "material.pabs_1", error);
+            check_json_field(config["material"]["k1"], "material.k1", error);
+            check_json_field(config["material"]["mean_free_path_2"], "material.mean_free_path_2", error);
+            check_json_field(config["material"]["pabs_2"], "material.pabs_2", error);
+            check_json_field(config["material"]["k2"], "material.k2", error);
+            check_json_field(config["geometry"]["total_length"], "geometry.total_length", error);
+            check_json_field(config["geometry"]["x_init"], "geometry.x_init", error);
+        }
+        else {
+            error.add_error("ERROR. Geometry not supported: " + shape);
+        }
+    }
 }
 
 int main(int argc, char* argv[]) {
@@ -37,124 +118,127 @@ int main(int argc, char* argv[]) {
     }
 
     json config;
-    config_file >> config;
+    try {
+        config_file >> config;
+    } catch (const json::parse_error& e) {
+        std::cerr << "Error parsing JSON file: " << e.what() << "\n";
+        return 1;
+    }
+
+    ConfigError config_error;
+    validate_config(config, config_error);
+    
+    if (config_error.has_errors()) {
+        config_error.print_errors();
+        return 1;
+    }
 
     int NumberSims = config["run"]["simulations"];
     std::string run_name = config["run"]["run_name"];
     std::string shape = config["geometry"]["shape"];
+    double length = std::atof(argv[2]);
 
     std::__fs::filesystem::create_directories("../out/" + run_name + "/data");
 
-    double length = std::atof(argv[2]);
+    std::vector<double> absorbed_ratios, reflected_ratios, transmitted_ratios;
+    bool saved_absorbed = false, saved_reflected = false, saved_transmitted = false;
 
-    RegularSlab mat(0.0, 0.0, 0.0, 0.0, 0.0);
+    double x0 = config["particle"]["x"];
+    double y0 = config["particle"]["y"];
+    double z0 = config["particle"]["z"];
+    double vx = config["particle"]["vx"];
+    double vy = config["particle"]["vy"];
+    double vz = config["particle"]["vz"];
 
-    if (shape == "regular_slab"){
-
-        double lambda = config["material"]["mean_free_path"];
-        double pabs = config["material"]["pabs"];
-        double k = config["material"]["k"];
-        double x_init = config["geometry"]["x_init"];
-
-        RegularSlab mat(lambda, pabs, k, length, x_init);
-
-    } else if (shape == "sphere"){
-
-        double lambda = config["material"]["mean_free_path"];
-        double pabs = config["material"]["pabs"];
-        double k = config["material"]["k"];
-
-        Sphere mat(lambda, pabs, k, length);
-
-    } else if (shape == "finite_slab"){
-
-        double lambda = config["material"]["mean_free_path"];
-        double pabs = config["material"]["pabs"];
-        double k = config["material"]["k"];
-
-        double xlength = config["geometry"]["x_length"];
-        double ylength = config["geometry"]["y_length"];
-
-        FiniteSlab mat(lambda, pabs, k, xlength, ylength, length);
-
-    } else if (shape == "double_slab") {
-
-        double lambda1 = config["material"]["mean_free_path_1"];
-        double pabs1 = config["material"]["pabs_1"];
-        double k1 = config["material"]["k1"];
-        double lambda2 = config["material"]["mean_free_path_2"];
-        double pabs2 = config["material"]["pabs_2"];
-        double k2 = config["material"]["k2"];
-
-        double totalLength = config["geometry"]["total_length"];
-        double xinit = config["geometry"]["x_init"];
-
-        DoubleSlab mat(lambda1, pabs1, k1, lambda2, pabs2, k2, totalLength, xinit, length);
-
-    } else {
-        std::cerr << "ERROR. Geometry not suported." << std::endl;
+    std::unique_ptr<BaseMaterial> material;
+    
+    try {
+        if (shape == "regular_slab") {
+            material = std::make_unique<RegularSlab>(
+                config["material"]["mean_free_path"],
+                config["material"]["pabs"],
+                config["material"]["k"],
+                length,
+                config["geometry"]["x_init"]
+            );
+        }
+        else if (shape == "sphere") {
+            material = std::make_unique<Sphere>(
+                config["material"]["mean_free_path"],
+                config["material"]["pabs"],
+                config["material"]["k"],
+                length
+            );
+        }
+        else if (shape == "finite_slab") {
+            material = std::make_unique<FiniteSlab>(
+                config["material"]["mean_free_path"],
+                config["material"]["pabs"],
+                config["material"]["k"],
+                config["geometry"]["x_length"],
+                config["geometry"]["y_length"],
+                length
+            );
+        }
+        else if (shape == "double_slab") {
+            material = std::make_unique<DoubleSlab>(
+                config["material"]["mean_free_path_1"],
+                config["material"]["pabs_1"],
+                config["material"]["k1"],
+                config["material"]["mean_free_path_2"],
+                config["material"]["pabs_2"],
+                config["material"]["k2"],
+                config["geometry"]["total_length"],
+                config["geometry"]["x_init"],
+                length
+            );
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error creating material: " << e.what() << std::endl;
         return 1;
     }
 
-    std::vector<double> absorbed_ratios, reflected_ratios, transmitted_ratios;
-
-    bool saved_absorbed = false;
-    bool saved_reflected = false;
-    bool saved_transmitted = false;
-
     for (int run = 0; run < 10; run++) {
-        
-        int NumAbsorbed = 0;
-        int NumReflected = 0;
-        int NumTransmitted = 0;
-
-        double x0 = config["particle"]["x"];
-        double y0 = config["particle"]["y"];
-        double z0 = config["particle"]["z"];
-        double vx = config["particle"]["vx"];
-        double vy = config["particle"]["vy"];
-        double vz = config["particle"]["vz"];
+        int NumAbsorbed = 0, NumReflected = 0, NumTransmitted = 0;
 
         for (int i = 0; i < NumberSims; i++) {
             Neutron n(x0, y0, z0, vx, vy, vz);
 
-            if (!mat.isWithinBounds(n)) {
-                std::cerr << "ERROR. The neutron starts the simulation outside the material." << std::endl;
+            if (!material->isWithinBounds(n)) {
+                std::cerr << "ERROR. The neutron starts outside the material." << std::endl;
                 return 2;
             }
 
             bool absorbed = false;
             bool reflected = false;
 
-            n.propagate(mat);
+            n.propagate(*material);
 
-            if (!mat.isWithinBounds(n)) {
+            if (!material->isWithinBounds(n)) {
                 reflected = true;
             } else {
-                while (mat.isWithinBounds(n)) {
-                    if (n.getAbsorption(mat)) {
+                while (material->isWithinBounds(n)) {
+                    if (n.getAbsorption(*material)) {
                         absorbed = true;
                         break;
                     }
-                    n.propagate(mat);
+                    n.propagate(*material);
                 }
             }
 
-            if (absorbed) {
-                NumAbsorbed++;
-            } else if (reflected) {
-                NumReflected++;
-            } else {
-                NumTransmitted++;
-            }
+            if (absorbed) NumAbsorbed++;
+            else if (reflected) NumReflected++;
+            else NumTransmitted++;
 
             if (absorbed && !saved_absorbed) {
                 n.saveHistoryToFile("../out/" + run_name + "/data/hist_absorbed.txt");
                 saved_absorbed = true;
-            } else if (reflected && !saved_reflected) {
+            } 
+            else if (reflected && !saved_reflected) {
                 n.saveHistoryToFile("../out/" + run_name + "/data/hist_reflected.txt");
                 saved_reflected = true;
-            } else if (!reflected && !absorbed && !saved_transmitted) {
+            } 
+            else if (!reflected && !absorbed && !saved_transmitted) {
                 n.saveHistoryToFile("../out/" + run_name + "/data/hist_transmitted.txt");
                 saved_transmitted = true;
             }
@@ -166,17 +250,12 @@ int main(int argc, char* argv[]) {
     }
 
     double mean_abs = compute_mean(absorbed_ratios);
-    double std_abs = compute_stddev(absorbed_ratios, mean_abs);
-
     double mean_refl = compute_mean(reflected_ratios);
-    double std_refl = compute_stddev(reflected_ratios, mean_refl);
-
     double mean_trans = compute_mean(transmitted_ratios);
-    double std_trans = compute_stddev(transmitted_ratios, mean_trans);
 
-    std::cout <<  mean_abs << " " << std_abs << " "
-              << mean_refl << " " << std_refl << " "
-              << mean_trans << " " << std_trans << std::endl;
+    std::cout << mean_abs << " " << compute_stddev(absorbed_ratios, mean_abs) << " "
+              << mean_refl << " " << compute_stddev(reflected_ratios, mean_refl) << " "
+              << mean_trans << " " << compute_stddev(transmitted_ratios, mean_trans) << std::endl;
 
     return 0;
 }
