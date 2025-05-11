@@ -1,4 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
+
+app.commandLine.appendSwitch('disable-logging');
+
 const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
@@ -13,11 +16,11 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      devTools: false
     },
   });
 
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-  mainWindow.webContents.openDevTools();
 };
 
 app.whenReady().then(() => {
@@ -33,7 +36,7 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle('save-config', async (event, data) => {
   try {
-  const filePath = path.join(__dirname,'..','..','..','..', '..', 'config_new.json');
+  const filePath = path.join(__dirname,'..', '..', 'config_new.json');
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
   } catch(error) {
       console.error('Error saving config:', error);
@@ -44,15 +47,33 @@ ipcMain.handle('save-config', async (event, data) => {
 
 ipcMain.handle('run-bash-script', async () => {
   return new Promise((resolve, reject) => {
-    exec('bash /Users/maria/Desktop/Máster/M1/S2/Scientific_computing_and_software_design/Particle_transport/Particle_Transport.sh config.json', (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error ejecutando script: ${error.message}`);
-        reject(error);
-      } else {
-        console.log(`stdout: ${stdout}`);
-        console.error(`stderr: ${stderr}`);
-        resolve(stdout);
+    const scriptPath = path.join(__dirname, '..', '..', 'Particle_Transport.sh');
+    
+    if (!fs.existsSync(scriptPath)) {
+      const error = new Error(`The script does not exist in: ${scriptPath}`);
+      console.error(error.message);
+      return reject(error);
+    }
+
+    if (process.platform !== 'win32') {
+      try {
+        fs.chmodSync(scriptPath, 0o755); 
+      } catch (chmodError) {
+        console.warn('The script permisions could not be changed', chmodError);
       }
+    }
+
+    const command = `bash "${scriptPath}" config.json`;
+    console.log(`Executing: ${command}`);
+    
+    exec(command, { maxBuffer: 1024 * 1024 * 5 }, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing script: ${error.message}`);
+        console.error(`stderr: ${stderr}`);
+        return reject(new Error(stderr || error.message));
+      }
+      console.log(`stdout: ${stdout}`);
+      resolve(stdout);
     });
   });
 });

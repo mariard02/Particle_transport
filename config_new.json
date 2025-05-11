@@ -1,0 +1,17 @@
+{
+  "run": {
+    "run_name": "1",
+    "simulations": 1
+  },
+  "material": {
+    "mean_free_path": null,
+    "pabs": null,
+    "k": null
+  },
+  "geometry": {
+    "shape": "regular_slab",
+    "min_scale": null,
+    "max_scale": null,
+    "x_init": null
+  }
+}

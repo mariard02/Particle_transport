@@ -3,7 +3,7 @@
 # Exit immediately if any command fails
 set -e
 
-cd "$(dirname "$0")"
+cd "/Users/maria/Desktop/Máster/M1/S2/Scientific_computing_and_software_design/Particle_transport"
 
 if [ $# -lt 1 ]; then
   echo "Usage: $0 config.json" >&2
@@ -20,11 +20,11 @@ fi
 
 # Check if the JSON file exists
 if [ ! -f "$json_file" ]; then
-    echo "Error: configuration file '$json_file' not found." >&2
+    echo "Error: JSON file '$json_file' not found." >&2
     exit 1
 fi
 
-# Extract values
+# Extract values with error checking
 run_name=$(jq -r '.run.run_name' "$json_file" || { echo "Error reading run_name from $json_file" >&2; exit 1; })
 min_scale=$(jq -r '.geometry.min_scale' "$json_file" || { echo "Error reading min_scale from $json_file" >&2; exit 1; })
 max_scale=$(jq -r '.geometry.max_scale' "$json_file" || { echo "Error reading max_scale from $json_file" >&2; exit 1; })
@@ -53,7 +53,7 @@ cd cpp || { echo "Error entering cpp directory" >&2; exit 1; }
 output_file="$output_dir/simulations_output.txt"
 echo "Length (L) Absorbed std Reflected std Transmitted std" > "$output_file" || { echo "Error creating output file" >&2; exit 1; }
 
-# Compile
+# Compile with error checking
 g++ -std=c++14 -Iinclude main.cpp src/*.cpp -o simulation || {
     echo "Compilation failed. Aborting." >&2
     exit 1 
@@ -69,7 +69,7 @@ rm simulation || { echo "Warning: could not remove simulation binary" >&2; }
 
 cd .. || { echo "Error returning to parent directory" >&2; exit 1; }
 
-# Run Python script
+# Run Python script with error checking
 python3 plot_particle_transport.py --configuration "$json_file" || {
     echo "Error running Python plotting script" >&2
     exit 1

@@ -196,107 +196,136 @@
         <button type="submit" id="submit-button" disabled>Save configuration</button>
         <button type="button" id="run-script-button">Run Simulation</button>
       </div>
+      <div id="loading-modal" style="display: none;">
+        <div class="modal-content">
+          <p>Running simulations, please wait...</p>
+          <div class="spinner"></div>
+        </div>
+      </div>
     
       </form>
 
-    <script>
-      const form = document.getElementById('config-form');
-      const button = document.getElementById('submit-button');
 
-      const shapeSelect = document.getElementById('shape');
-      const slabOptions = document.getElementById('slab-options');
-      const sphereOptions = document.getElementById('sphere-options');
-      const finiteSlabOptions = document.getElementById('finite-slab-options');
-      const doubleSlabOptions = document.getElementById('double-slab-options')
+<script>
+  const form = document.getElementById('config-form');
+  const submitButton = document.getElementById('submit-button');
+  const runScriptButton = document.getElementById('run-script-button');
+  
+  let isConfigSaved = false; // Nuevo estado para rastrear si la configuración está guardada
 
-      shapeSelect.addEventListener('change', () => {
-        slabOptions.classList.add('hidden');
-        sphereOptions.classList.add('hidden');
-        finiteSlabOptions.classList.add('hidden');
-        doubleSlabOptions.classList.add('hidden');
+  const shapeSelect = document.getElementById('shape');
+  const slabOptions = document.getElementById('slab-options');
+  const sphereOptions = document.getElementById('sphere-options');
+  const finiteSlabOptions = document.getElementById('finite-slab-options');
+  const doubleSlabOptions = document.getElementById('double-slab-options')
 
-        if (shapeSelect.value === 'regular_slab') {
-          slabOptions.classList.remove('hidden');
-        } else if (shapeSelect.value === 'sphere') {
-          sphereOptions.classList.remove('hidden');
-        } else if (shapeSelect.value === 'finite_slab') {
-          finiteSlabOptions.classList.remove('hidden');
-        } else if (shapeSelect.value === 'double') {
-          doubleSlabOptions.classList.remove('hidden')
-        }
+  shapeSelect.addEventListener('change', () => {
+    slabOptions.classList.add('hidden');
+    sphereOptions.classList.add('hidden');
+    finiteSlabOptions.classList.add('hidden');
+    doubleSlabOptions.classList.add('hidden');
 
-        button.disabled = !form.checkValidity();
-      });
+    if (shapeSelect.value === 'regular_slab') {
+      slabOptions.classList.remove('hidden');
+    } else if (shapeSelect.value === 'sphere') {
+      sphereOptions.classList.remove('hidden');
+    } else if (shapeSelect.value === 'finite_slab') {
+      finiteSlabOptions.classList.remove('hidden');
+    } else if (shapeSelect.value === 'double') {
+      doubleSlabOptions.classList.remove('hidden')
+    }
 
-      form.addEventListener('input', () => {
-        button.disabled = !form.checkValidity();
-      });
+    submitButton.disabled = !form.checkValidity();
+    runScriptButton.disabled = true; // Deshabilitar el botón de ejecución cuando se cambia la forma
+    isConfigSaved = false; // Resetear el estado guardado
+  });
 
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
+  form.addEventListener('input', () => {
+    submitButton.disabled = !form.checkValidity();
+    if (!isConfigSaved) {
+      runScriptButton.disabled = true; // Asegurarse que el botón de ejecución está deshabilitado si hay cambios no guardados
+    }
+  });
 
-        const shape = shapeSelect.value;
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-        const data = {
-          run: {
-            run_name: document.getElementById('run_name').value,
-            simulations: parseInt(document.getElementById('simulations').value),
-          },
-          material: {
+    const shape = shapeSelect.value;
 
-          },
-          geometry: {
-            shape: shape,
-          },
-        };
+    const data = {
+      run: {
+        run_name: document.getElementById('run_name').value,
+        simulations: parseInt(document.getElementById('simulations').value),
+      },
+      material: {
 
-        if (shape === 'regular_slab') {
-          data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
-          data.material.pabs = parseFloat(document.getElementById('pabs').value);
-          data.material.k = parseFloat(document.getElementById('k').value);
-          data.geometry.min_scale = parseFloat(document.getElementById('min_slab_thickness').value);
-          data.geometry.max_scale = parseFloat(document.getElementById('max_slab_thickness').value);
-          data.geometry.x_init = parseFloat(document.getElementById('slab_position').value)
-        } else if (shape === 'sphere') {
-          data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
-          data.material.pabs = parseFloat(document.getElementById('pabs').value);
-          data.material.k = parseFloat(document.getElementById('k').value);
-          data.geometry.min_scale = parseFloat(document.getElementById('min_sphere_radius').value)
-          data.geometry.max_scale = parseFloat(document.getElementById('max_sphere_radius').value)
-        } else if (shape === 'finite_slab') {
-          data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
-          data.material.pabs = parseFloat(document.getElementById('pabs').value);
-          data.material.k = parseFloat(document.getElementById('k').value);
-          data.geometry.x_length = parseFloat(document.getElementById('x_length').value);
-          data.geometry.y_length = parseFloat(document.getElementById('y_length').value);
-          data.geometry.min_scale = parseFloat(document.getElementById('min_lenght').value);
-          data.geometry.max_scale = parseFloat(document.getElementById('max_length').value);
-        } else if (shape === 'double_slab') {
-          data.geometry.total_length = parseFloat(document.getElementById('total_length').value);
-          data.geometry.min_scale = parseFloat(document.getElementById('min_ratio').value);
-          data.geometry.max_scale = parseFloat(document.getElementById('max_ratio').value);
-          data.geometry.x_init = parseFloat(document.getElementById('slab_position').value);
+      },
+      geometry: {
+        shape: shape,
+      },
+    };
 
-          data.material.mean_free_path1 = parseFloat(document.getElementById('mean_free_path1').value);
-          data.material.mean_free_path2 = parseFloat(document.getElementById('mean_free_path2').value);
-          data.material.pabs1 = parseFloat(document.getElementById('pabs1').value);
-          data.material.pabs2 = parseFloat(document.getElementById('pabs2').value);
-          data.material.k1 = parseFloat(document.getElementById('k1').value);
-          data.material.k2 = parseFloat(document.getElementById('k2').value);
+    if (shape === 'regular_slab') {
+      data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
+      data.material.pabs = parseFloat(document.getElementById('pabs').value);
+      data.material.k = parseFloat(document.getElementById('k').value);
+      data.geometry.min_scale = parseFloat(document.getElementById('min_slab_thickness').value);
+      data.geometry.max_scale = parseFloat(document.getElementById('max_slab_thickness').value);
+      data.geometry.x_init = parseFloat(document.getElementById('slab_position').value)
+    } else if (shape === 'sphere') {
+      data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
+      data.material.pabs = parseFloat(document.getElementById('pabs').value);
+      data.material.k = parseFloat(document.getElementById('k').value);
+      data.geometry.min_scale = parseFloat(document.getElementById('min_sphere_radius').value)
+      data.geometry.max_scale = parseFloat(document.getElementById('max_sphere_radius').value)
+    } else if (shape === 'finite_slab') {
+      data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
+      data.material.pabs = parseFloat(document.getElementById('pabs').value);
+      data.material.k = parseFloat(document.getElementById('k').value);
+      data.geometry.x_length = parseFloat(document.getElementById('x_length').value);
+      data.geometry.y_length = parseFloat(document.getElementById('y_length').value);
+      data.geometry.min_scale = parseFloat(document.getElementById('min_lenght').value);
+      data.geometry.max_scale = parseFloat(document.getElementById('max_length').value);
+    } else if (shape === 'double_slab') {
+      data.geometry.total_length = parseFloat(document.getElementById('total_length').value);
+      data.geometry.min_scale = parseFloat(document.getElementById('min_ratio').value);
+      data.geometry.max_scale = parseFloat(document.getElementById('max_ratio').value);
+      data.geometry.x_init = parseFloat(document.getElementById('slab_position').value);
 
-        }
+      data.material.mean_free_path1 = parseFloat(document.getElementById('mean_free_path1').value);
+      data.material.mean_free_path2 = parseFloat(document.getElementById('mean_free_path2').value);
+      data.material.pabs1 = parseFloat(document.getElementById('pabs1').value);
+      data.material.pabs2 = parseFloat(document.getElementById('pabs2').value);
+      data.material.k1 = parseFloat(document.getElementById('k1').value);
+      data.material.k2 = parseFloat(document.getElementById('k2').value);
+    }
 
-        await window.electronAPI.saveConfig(data);
-      });
+    await window.electronAPI.saveConfig(data);
+    isConfigSaved = true; // Marcar la configuración como guardada
+    runScriptButton.disabled = false; // Habilitar el botón de ejecución
+    alert(`Configuration saved`);
+  });
 
-      document.getElementById('run-script-button').addEventListener('click', async () => {
-      try {
-        const result = await window.electronAPI.runBashScript();
-        alert(`Script ejecutado:\n${result}`);
-      } catch (err) {
-        alert(`Error al ejecutar script:\n${err.message}`);
-      }
-    });
-    </script>
+  // Inicialmente deshabilitar el botón de ejecución
+  runScriptButton.disabled = true;
+
+  document.getElementById('run-script-button').addEventListener('click', async () => {
+    const modal = document.getElementById('loading-modal');
+    const button = document.getElementById('run-script-button');
+
+    modal.style.display = 'flex';
+    button.disabled = true;
+
+    try {
+      const result = await window.electronAPI.runBashScript();
+      alert(`${result}`);
+    } catch (err) {
+      alert(`Error al ejecutar script:\n${err.message}`);
+    } finally {
+      modal.style.display = 'none';
+      button.disabled = !isConfigSaved; // Restaurar estado basado en si la configuración está guardada
+    }
+  });
+</script>
   </body>
 </html>
