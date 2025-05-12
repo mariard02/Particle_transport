@@ -36,7 +36,7 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle('save-config', async (event, data) => {
   try {
-  const filePath = path.join(__dirname,'..', '..', 'config_new.json');
+  const filePath = path.join(__dirname,'..', '..', 'config.json');
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
   } catch(error) {
       console.error('Error saving config:', error);

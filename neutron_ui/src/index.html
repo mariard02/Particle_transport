@@ -4,11 +4,6 @@
     <meta charset="UTF-8" />
     <title>Particle Transport Simulation</title>
     <link rel="stylesheet" href="index.css" />
-    <style>
-      .hidden {
-        display: none;
-      }
-    </style>
   </head>
   <body>
     <form id="config-form">
@@ -25,6 +20,11 @@
         </label>
 
         <label>
+          <div class="identifier">Save and plot histories: </div>
+          <input type = "checkbox" id = "save-histories" value="True" />
+        </label>
+
+        <label>
           <div class="identifier">Shape:</div>
           <select id="shape" required>
             <option value="">-- Choose an option --</option>
@@ -33,6 +33,37 @@
             <option value="sphere">Sphere</option>
             <option value="double">Double Slab (two materials)</option>
           </select>
+        </label>
+
+      </div>
+
+      <div class="config-group">
+        <div class="config-group-title">Particle Properties</div>
+        <h4>Initial position</h4>
+        <label>
+          <div class="identifier">x = </div>
+          <input type="number" id="x" step="0.01" />
+        </label>
+        <label>
+          <div class="identifier">y = </div>
+          <input type="number" id="y" step="0.01" />
+        </label>
+        <label>
+          <div class="identifier">z = </div>
+          <input type="number" id="z" step="0.01" />
+        </label>
+        <h4>Initial velocity</h4>
+        <label>
+          <div class="identifier">vx = </div>
+          <input type="number" id="vx" step="0.01" />
+        </label>
+        <label>
+          <div class="identifier">vy = </div>
+          <input type="number" id="vy" step="0.01" />
+        </label>
+        <label>
+          <div class="identifier">vz = </div>
+          <input type="number" id="vz" step="0.01" />
         </label>
       </div>
 
@@ -211,7 +242,9 @@
   const submitButton = document.getElementById('submit-button');
   const runScriptButton = document.getElementById('run-script-button');
   
-  let isConfigSaved = false; // Nuevo estado para rastrear si la configuración está guardada
+  let isConfigSaved = false; 
+
+  const checkbox = document.getElementById("save-histories");
 
   const shapeSelect = document.getElementById('shape');
   const slabOptions = document.getElementById('slab-options');
@@ -236,14 +269,14 @@
     }
 
     submitButton.disabled = !form.checkValidity();
-    runScriptButton.disabled = true; // Deshabilitar el botón de ejecución cuando se cambia la forma
-    isConfigSaved = false; // Resetear el estado guardado
+    runScriptButton.disabled = true; 
+    isConfigSaved = false;
   });
 
   form.addEventListener('input', () => {
     submitButton.disabled = !form.checkValidity();
     if (!isConfigSaved) {
-      runScriptButton.disabled = true; // Asegurarse que el botón de ejecución está deshabilitado si hay cambios no guardados
+      runScriptButton.disabled = true;
     }
   });
 
@@ -257,6 +290,14 @@
         run_name: document.getElementById('run_name').value,
         simulations: parseInt(document.getElementById('simulations').value),
       },
+      particle: {
+        x: parseFloat(document.getElementById('x').value),
+        y: parseFloat(document.getElementById('y').value),
+        z: parseFloat(document.getElementById('z').value),
+        vx: parseFloat(document.getElementById('vx').value),
+        vy: parseFloat(document.getElementById('vy').value),
+        vz: parseFloat(document.getElementById('vz').value),
+      },
       material: {
 
       },
@@ -264,6 +305,12 @@
         shape: shape,
       },
     };
+
+    if (checkbox.checked) {
+      data.run.save_hist = "True";
+    } else {
+      data.run.save_hist = "False";
+    }
 
     if (shape === 'regular_slab') {
       data.material.mean_free_path = parseFloat(document.getElementById('mean_free_path').value);
@@ -301,12 +348,11 @@
     }
 
     await window.electronAPI.saveConfig(data);
-    isConfigSaved = true; // Marcar la configuración como guardada
-    runScriptButton.disabled = false; // Habilitar el botón de ejecución
+    isConfigSaved = true; 
+    runScriptButton.disabled = false;
     alert(`Configuration saved`);
   });
 
-  // Inicialmente deshabilitar el botón de ejecución
   runScriptButton.disabled = true;
 
   document.getElementById('run-script-button').addEventListener('click', async () => {
@@ -323,7 +369,7 @@
       alert(`Error al ejecutar script:\n${err.message}`);
     } finally {
       modal.style.display = 'none';
-      button.disabled = !isConfigSaved; // Restaurar estado basado en si la configuración está guardada
+      button.disabled = !isConfigSaved;
     }
   });
 </script>

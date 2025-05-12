@@ -1,29 +1,25 @@
 {
-    "run": {
-        "run_name": "run5",
-        "simulations": 500
-    },
-
-
-    "material": {
-        "mean_free_path": 0.5, 
-        "pabs": 0.1,
-        "k": 0.01
-    },
-
-    "geometry": {
-        "shape": "regular_slab",
-        "x_init" : 0.0,
-        "min_scale": 1.0,
-        "max_scale": 10.0
-    },
-
-    "particle": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0,
-        "vx": 0.5,
-        "vy": 0.0,
-        "vz": 0.0
-    }
+  "run": {
+    "run_name": "1",
+    "simulations": 1
+  },
+  "particle": {
+    "x": null,
+    "y": null,
+    "z": null,
+    "vx": null,
+    "vy": null,
+    "vz": null
+  },
+  "material": {
+    "mean_free_path": null,
+    "pabs": null,
+    "k": null
+  },
+  "geometry": {
+    "shape": "regular_slab",
+    "min_scale": null,
+    "max_scale": null,
+    "x_init": null
+  }
 }

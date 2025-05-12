@@ -66,46 +66,48 @@ def load_coords(filename):
                 continue
     return coords
 
-def plot_trajectories(data, output_dir):
-    trayectories = {
+def plot_trajectories(data, output_dir, decide = False):
+    if decide:
+        trayectories = {
         "Absorbed": (f"out/{data['run']['run_name']}/data/hist_absorbed.txt", "red"),
         "Reflected": (f"out/{data['run']['run_name']}/data/hist_reflected.txt", "green"),
         "Transmitted": (f"out/{data['run']['run_name']}/data/hist_transmitted.txt", "blue")
-    }
+        }
 
-    fig = plt.figure(figsize=(9, 6))
-    ax = fig.add_subplot(111, projection='3d')
+        fig = plt.figure(figsize=(9, 6))
+        ax = fig.add_subplot(111, projection='3d')
 
-    for label, (filename, color) in trayectories.items():
-        coords = load_coords(filename)
-        if not coords:
-            continue
-        x_vals = [c[0] for c in coords]
-        y_vals = [c[1] for c in coords]
-        z_vals = [c[2] for c in coords]
-        ax.plot(x_vals, y_vals, z_vals, linewidth=2, color=color, label=label)
+        for label, (filename, color) in trayectories.items():
+            coords = load_coords(filename)
+            if not coords:
+                continue
+            x_vals = [c[0] for c in coords]
+            y_vals = [c[1] for c in coords]
+            z_vals = [c[2] for c in coords]
+            ax.plot(x_vals, y_vals, z_vals, linewidth=2, color=color, label=label)
 
-    y = np.linspace(-10, 10, 2)
-    z = np.linspace(-10, 10, 2)
-    Y, Z = np.meshgrid(y, z)
+        y = np.linspace(-10, 10, 2)
+        z = np.linspace(-10, 10, 2)
+        Y, Z = np.meshgrid(y, z)
 
-    for x_val in [0, 10]:
-        X = np.full_like(Y, x_val)
-        ax.plot_surface(X, Y, Z, alpha=0.2, color='gray', edgecolor='none')
+        for x_val in [0, 10]:
+            X = np.full_like(Y, x_val)
+            ax.plot_surface(X, Y, Z, alpha=0.2, color='gray', edgecolor='none')
 
-    ax.set_title("Neutron trajectories")
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Z")
-    ax.set_xlim(-2, 12)
-    ax.legend()
-    plt.tight_layout()
+        ax.set_title("Neutron trajectories")
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.set_zlabel("Z")
+        ax.set_xlim(-2, 12)
+        ax.legend()
+        plt.tight_layout()
 
-    fname_suffix = f"lambda_{clean_filename(data['material']['mean_free_path'])}_pabs_{clean_filename(data['material']['pabs'])}_k_{clean_filename(data['material']['k'])}"
-    filename = os.path.join(output_dir, f"trajectories_{fname_suffix}.png")
-    plt.savefig(filename, dpi=300)
-    plt.close()
-    print(f"✅ Saved 3D trajectory plot: {filename}")
+        fname_suffix = f"lambda_{clean_filename(data['material']['mean_free_path'])}_pabs_{clean_filename(data['material']['pabs'])}_k_{clean_filename(data['material']['k'])}"
+        filename = os.path.join(output_dir, f"trajectories_{fname_suffix}.png")
+        plt.savefig(filename, dpi=300)
+        plt.close()
+        print(f"✅ Saved 3D trajectory plot: {filename}")
+
 
 def main():
     args = parse_arguments()
