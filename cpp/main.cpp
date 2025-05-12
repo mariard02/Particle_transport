@@ -137,6 +137,7 @@ int main(int argc, char* argv[]) {
     std::string run_name = config["run"]["run_name"];
     std::string shape = config["geometry"]["shape"];
     double length = std::atof(argv[2]);
+    bool save_histories = config["run"].contains("save_hist"); 
 
     std::__fs::filesystem::create_directories("../out/" + run_name + "/data");
 
@@ -230,17 +231,19 @@ int main(int argc, char* argv[]) {
             else if (reflected) NumReflected++;
             else NumTransmitted++;
 
-            if (absorbed && !saved_absorbed) {
-                n.saveHistoryToFile("../out/" + run_name + "/data/hist_absorbed.txt");
-                saved_absorbed = true;
-            } 
-            else if (reflected && !saved_reflected) {
-                n.saveHistoryToFile("../out/" + run_name + "/data/hist_reflected.txt");
-                saved_reflected = true;
-            } 
-            else if (!reflected && !absorbed && !saved_transmitted) {
-                n.saveHistoryToFile("../out/" + run_name + "/data/hist_transmitted.txt");
-                saved_transmitted = true;
+            if (save_histories) {
+                if (absorbed && !saved_absorbed) {
+                    n.saveHistoryToFile("../out/" + run_name + "/data/hist_absorbed.txt");
+                    saved_absorbed = true;
+                } 
+                else if (reflected && !saved_reflected) {
+                    n.saveHistoryToFile("../out/" + run_name + "/data/hist_reflected.txt");
+                    saved_reflected = true;
+                } 
+                else if (!reflected && !absorbed && !saved_transmitted) {
+                    n.saveHistoryToFile("../out/" + run_name + "/data/hist_transmitted.txt");
+                    saved_transmitted = true;
+                }
             }
         }
 
