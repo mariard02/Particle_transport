@@ -18,12 +18,7 @@
           <div class="identifier">Number of simulations:</div>
           <input type="number" id="simulations" required />
         </label>
-
-        <label>
-          <div class="identifier">Save and plot histories: </div>
-          <input type = "checkbox" id = "save-histories" value="True" />
-        </label>
-
+        
         <label>
           <div class="identifier">Shape:</div>
           <select id="shape" required>
@@ -33,6 +28,11 @@
             <option value="sphere">Sphere</option>
             <option value="double">Double Slab (two materials)</option>
           </select>
+        </label>
+
+        <label for="save-histories">
+          <input type="checkbox" id="save-histories" value="True" />
+          <div class="identifier">Save and plot histories</div>
         </label>
 
       </div>

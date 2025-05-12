@@ -135,7 +135,6 @@ button[type="button"]:hover {
   z-index: 999;
 }
 
-/* Recuadro centrado */
 .modal-content {
   background-color: white;
   padding: 20px 30px;
@@ -145,7 +144,6 @@ button[type="button"]:hover {
   font-family: sans-serif;
 }
 
-/* Spinner animado */
 .spinner {
   margin: 15px auto 0;
   border: 4px solid #f3f3f3;
@@ -159,4 +157,70 @@ button[type="button"]:hover {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+label[for="save-histories"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+#save-histories {
+  position: absolute;
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+
+#save-histories + .identifier {
+  position: relative;
+  padding-left: 28px;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+#save-histories + .identifier:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 18px;
+  width: 18px;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+#save-histories:checked + .identifier:before {
+  background-color: #10b981;
+  border-color: #10b981;
+}
+
+#save-histories:checked + .identifier:after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-60%) rotate(45deg);
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+}
+
+#save-histories:not(:disabled) + .identifier:hover:before {
+  border-color: #10b981;
+}
+
+#save-histories:disabled + .identifier {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+#save-histories:disabled + .identifier:before {
+  background-color: #f1f5f9;
 }
