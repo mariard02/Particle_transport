@@ -119,7 +119,7 @@ def main():
 
     plot_probabilities(L, absorbed, absorbed_std, reflected, reflected_std, transmitted, transmitted_std, data, output_dir)
 
-    if data.get("save_hist", True):
+    if data.get("save_hist", False):
         plot_trajectories(data, output_dir)
 
 if __name__ == "__main__":

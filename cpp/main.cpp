@@ -155,24 +155,48 @@ int main(int argc, char* argv[]) {
     
     try {
         if (shape == "regular_slab") {
-            material = std::make_unique<RegularSlab>(
-                config["material"]["mean_free_path"],
-                config["material"]["pabs"],
-                config["material"]["k"],
-                length,
-                config["geometry"]["x_init"]
-            );
+            if (config["material"]["A"].is_null()){
+                material = std::make_unique<RegularSlab>(
+                    config["material"]["mean_free_path"],
+                    config["material"]["pabs"],
+                    config["material"]["k"],
+                    length,
+                    config["geometry"]["x_init"]
+                );
+            } else {
+                material = std::make_unique<RegularSlab>(
+                    config["material"]["mean_free_path"],
+                    config["material"]["pabs"],
+                    config["material"]["k"],
+                    length,
+                    config["geometry"]["x_init"],
+                    config["material"]["A"]
+                );
+            }
+
         }
         else if (shape == "sphere") {
-            material = std::make_unique<Sphere>(
+            if (config["material"]["A"].is_null()) {
+                material = std::make_unique<Sphere>(
                 config["material"]["mean_free_path"],
                 config["material"]["pabs"],
                 config["material"]["k"],
                 length
             );
+            } else {
+                material = std::make_unique<Sphere>(
+                config["material"]["mean_free_path"],
+                config["material"]["pabs"],
+                config["material"]["k"],
+                length,
+                config["material"]["A"]
+            );
+            }
+
         }
         else if (shape == "finite_slab") {
-            material = std::make_unique<FiniteSlab>(
+            if (config["material"]["A"].is_null()) {
+                material = std::make_unique<FiniteSlab>(
                 config["material"]["mean_free_path"],
                 config["material"]["pabs"],
                 config["material"]["k"],
@@ -180,6 +204,18 @@ int main(int argc, char* argv[]) {
                 config["geometry"]["y_length"],
                 length
             );
+            } else {
+                material = std::make_unique<FiniteSlab>(
+                config["material"]["mean_free_path"],
+                config["material"]["pabs"],
+                config["material"]["k"],
+                config["geometry"]["x_length"],
+                config["geometry"]["y_length"],
+                length,
+                config["material"]["A"]
+            );
+            }
+
         }
         else if (shape == "double_slab") {
             material = std::make_unique<DoubleSlab>(

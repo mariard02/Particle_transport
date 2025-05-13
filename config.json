@@ -1,8 +1,7 @@
 {
   "run": {
-    "run_name": "whathappens",
-    "simulations": 1000,
-    "save_hist": "True"
+    "run_name": "withA",
+    "simulations": 1000
   },
   "particle": {
     "x": 0,
@@ -15,7 +14,8 @@
   "material": {
     "mean_free_path": 0.5,
     "pabs": 0.1,
-    "k": 0.01
+    "k": 0.01,
+    "A": 23
   },
   "geometry": {
     "shape": "regular_slab",
