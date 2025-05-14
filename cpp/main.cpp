@@ -219,11 +219,11 @@ int main(int argc, char* argv[]) {
         }
         else if (shape == "double_slab") {
             material = std::make_unique<DoubleSlab>(
-                config["material"]["mean_free_path_1"],
-                config["material"]["pabs_1"],
+                config["material"]["mean_free_path1"],
+                config["material"]["pabs1"],
                 config["material"]["k1"],
-                config["material"]["mean_free_path_2"],
-                config["material"]["pabs_2"],
+                config["material"]["mean_free_path2"],
+                config["material"]["pabs2"],
                 config["material"]["k2"],
                 config["geometry"]["total_length"],
                 config["geometry"]["x_init"],

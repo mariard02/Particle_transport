@@ -12,15 +12,14 @@ def parse_arguments():
     return parser.parse_args()
 
 def load_simulation_data(filename):
-    # Cargar los datos del archivo, que ahora incluyen las desviaciones estándar
     data = np.loadtxt(filename, skiprows=1)
-    L = data[:, 0]  # Longitudes de los slabs
-    absorbed = data[:, 1]  # Probabilidad de absorción
-    absorbed_std = data[:, 2]  # Desviación estándar de absorción
-    reflected = data[:, 3]  # Probabilidad de reflexión
-    reflected_std = data[:, 4]  # Desviación estándar de reflexión
-    transmitted = data[:, 5]  # Probabilidad de transmisión
-    transmitted_std = data[:, 6]  # Desviación estándar de transmisión
+    L = data[:, 0] 
+    absorbed = data[:, 1]  
+    absorbed_std = data[:, 2]  
+    reflected = data[:, 3]  
+    reflected_std = data[:, 4]  
+    transmitted = data[:, 5]  
+    transmitted_std = data[:, 6]  
     return L, absorbed, absorbed_std, reflected, reflected_std, transmitted, transmitted_std
 
 def clean_filename(value):
@@ -46,6 +45,7 @@ def plot_probabilities(L, absorbed, absorbed_std, reflected, reflected_std, tran
 
     # Guardar la gráfica
     fname_suffix = f"lambda_{clean_filename(data['material']['mean_free_path'])}_pabs_{clean_filename(data['material']['pabs'])}_k_{clean_filename(data['material']['k'])}"
+    
     filename = os.path.join(output_dir, f"probabilities_{fname_suffix}.png")
     plt.savefig(filename, dpi=300)
     plt.close()
@@ -102,6 +102,7 @@ def plot_trajectories(data, output_dir):
     plt.tight_layout()
 
     fname_suffix = f"lambda_{clean_filename(data['material']['mean_free_path'])}_pabs_{clean_filename(data['material']['pabs'])}_k_{clean_filename(data['material']['k'])}"
+
     filename = os.path.join(output_dir, f"trajectories_{fname_suffix}.png")
     plt.savefig(filename, dpi=300)
     plt.close()
@@ -119,7 +120,7 @@ def main():
 
     plot_probabilities(L, absorbed, absorbed_std, reflected, reflected_std, transmitted, transmitted_std, data, output_dir)
 
-    if data.get("save_hist", False):
+    if data['run'].get("save_hist", False):
         plot_trajectories(data, output_dir)
 
 if __name__ == "__main__":

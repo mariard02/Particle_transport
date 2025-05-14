@@ -16,18 +16,23 @@ form {
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  max-width: 600px;
+  max-width: 800px;
   width: 100%;
   overflow: hidden;
   box-sizing: border-box;
   margin-top: 1rem;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 1.5rem;
+h1, h4 {
+  margin: 0.5rem 0;
   color: #1e293b;
   font-weight: 600;
+}
+
+h4 {
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .config-group {
@@ -35,7 +40,7 @@ h1 {
   border-radius: 10px;
   padding: 1.25rem;
   margin-bottom: 1.5rem;
-  border-left: 4px solid #328E6E; 
+  border-left: 4px solid #328E6E;
 }
 
 .config-group-title {
@@ -43,6 +48,37 @@ h1 {
   color: #67AE6E;
   margin-bottom: 1rem;
   font-size: 1.1rem;
+}
+
+/* Estilo para filas de campos relacionados */
+.field-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.field-row label {
+  flex: 1;
+  min-width: 120px;
+  max-width: calc(33% - 1rem);
+}
+
+/* Para grupos con 2 campos */
+.field-row.label-2 label {
+  max-width: calc(50% - 1rem);
+}
+
+
+.field-row .identifier {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.field-row input {
+  display: inline-block;
+  width: auto;
+  flex: 1;
 }
 
 label {
@@ -53,29 +89,35 @@ label {
 }
 
 .identifier {
-  margin-bottom: 0.25rem;
-  font-weight: 500;
+  font-size: 0.85rem;
   color: #475569;
-  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
 }
+
 
 input, select {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
   margin-top: 0.25rem;
   margin-bottom: 0.5rem;
   box-sizing: border-box;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   display: block;
   background-color: #fff;
   transition: border-color 0.2s;
+  max-width: 300px;
+}
+
+input[type="number"] {
+  width: 100%;
+  min-width: 80px;
 }
 
 input:focus, select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: #2a7a5f;
   box-shadow: 0 0 0 2px #bfdbfe;
 }
 
@@ -83,34 +125,41 @@ input:focus, select:focus {
   display: none;
 }
 
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
 button {
-  padding: 0.75rem 1.5rem;
-  margin-top: 1rem;
-  margin-right: 1rem;
+  padding: 0.65rem 1.5rem;
   border: none;
   border-radius: 6px;
   background-color: #10b981;
   color: white;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  font-size: 0.95rem;
 }
 
 button:hover {
   background-color: #059669;
+  transform: translateY(-1px);
 }
 
 button:disabled {
   background-color: #94a3b8;
   cursor: not-allowed;
+  transform: none;
 }
 
 button[type="button"] {
-  background-color: #10b981;
+  background-color: #328E6E;
 }
 
 button[type="button"]:hover {
-  background-color: #059669;
+  background-color: #2a7a5f;
 }
 
 #run-script-button:disabled {
@@ -159,6 +208,20 @@ button[type="button"]:hover {
   100% { transform: rotate(360deg); }
 }
 
+/* Mantenemos todos los estilos anteriores excepto la parte del checkbox */
+
+/* Eliminamos la sección .checkbox-container y restauramos el estilo original */
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: auto !important;
+  flex-grow: 0 !important;
+  padding-right: 1rem;
+}
+
+
 label[for="save-histories"] {
   display: flex;
   align-items: center;
@@ -179,6 +242,7 @@ label[for="save-histories"] {
   padding-left: 28px;
   cursor: pointer;
   margin-bottom: 0;
+  user-select: none;
 }
 
 #save-histories + .identifier:before {
@@ -223,4 +287,22 @@ label[for="save-histories"] {
 
 #save-histories:disabled + .identifier:before {
   background-color: #f1f5f9;
+}
+
+/* Ajustes para select */
+select {
+  min-width: 150px;
+}
+
+
+/* Ajustes para campos en grupos específicos */
+.config-group .config-group {
+  background-color: #e8f0f8;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.config-group .config-group-title {
+  font-size: 1rem;
+  color: #2a7a5f;
 }

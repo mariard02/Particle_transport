@@ -1,7 +1,7 @@
 {
   "run": {
-    "run_name": "withA",
-    "simulations": 1000
+    "run_name": "jeje",
+    "simulations": 100
   },
   "particle": {
     "x": 0,
@@ -15,12 +15,11 @@
     "mean_free_path": 0.5,
     "pabs": 0.1,
     "k": 0.01,
-    "A": 23
+    "A": 50
   },
   "geometry": {
-    "shape": "regular_slab",
-    "min_scale": 1,
-    "max_scale": 10,
-    "x_init": 0
+    "shape": "sphere",
+    "min_scale": 2,
+    "max_scale": 20
   }
 }

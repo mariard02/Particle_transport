@@ -60,7 +60,13 @@ g++ -std=c++14 -Iinclude main.cpp src/*.cpp -o simulation || {
 }
 
 # Run simulations
-for L in $(seq $min_scale $max_scale); do
+iterations=20
+for ((i=0; i<=$iterations; i++)); do
+    
+    L=$(echo "$min_scale + ($max_scale - $min_scale) * $i / $iterations" | bc -l)
+
+    L=$(echo "scale=2; $L/1" | bc -l)
+    
     output=$(./simulation "../$json_file" $L)
     echo "$L $output" >> "$output_file" || { echo "Error writing to output file" >&2; exit 1; }
 done
