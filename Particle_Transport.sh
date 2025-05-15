@@ -45,6 +45,11 @@ if [ -z "$max_scale" ]; then
     exit 1
 fi
 
+if [ "$min_scale" -gt "$max_scale" ]; then 
+    echo "Error: minimum scale must be smaller than maximum scale" >&2
+    exit 1
+fi
+
 output_dir="$(pwd)/out/$run_name/data"
 mkdir -p "$output_dir" || { echo "Error creating output directory $output_dir" >&2; exit 1; }
 

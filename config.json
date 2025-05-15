@@ -19,7 +19,7 @@
   },
   "geometry": {
     "shape": "sphere",
-    "min_scale": 2,
-    "max_scale": 20
+    "min_scale": 20,
+    "max_scale": 2
   }
 }
