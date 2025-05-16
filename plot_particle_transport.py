@@ -2,14 +2,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import argparse
+from dataclasses import asdict, dataclass
+import simple_parsing
 import shutil
 import json
 import os
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='Plot simulation results.')
-    parser.add_argument('--configuration', type=str, required=True, help="Configuration file")
-    return parser.parse_args()
+@dataclass
+class TrainingCli:
+    """
+    Command-line arguments for a training run.
+
+    Attributes:
+        run_name (str): Unique identifier for the training run (used in filenames/paths).
+        no_config_edit (bool): If True, skip prompting user to edit the config file before running.
+    """
+    configuration: str
+    no_multiple_geometries: bool = False
 
 def load_simulation_data(filename):
     data = np.loadtxt(filename, skiprows=1)
@@ -110,15 +119,20 @@ def plot_trajectories(data, output_dir):
 
 
 def main():
-    args = parse_arguments()
-    f = open(args.configuration)
+    parser = simple_parsing.ArgumentParser(add_help=True, description="Analyse the simulation results.")
+    parser.add_arguments(TrainingCli, dest="cli")
+    args = parser.parse_args()
+    cli: TrainingCli = args.cli
+
+    f = open(cli.configuration)
     data = json.load(f)
     output_dir = f'out/{data["run"]["run_name"]}'
     os.makedirs(output_dir, exist_ok=True)
-    shutil.copy(args.configuration, output_dir)
-    L, absorbed, absorbed_std, reflected, reflected_std, transmitted, transmitted_std = load_simulation_data(f'out/{data["run"]["run_name"]}/data/simulations_output.txt')
+    shutil.copy(cli.configuration, output_dir)
 
-    plot_probabilities(L, absorbed, absorbed_std, reflected, reflected_std, transmitted, transmitted_std, data, output_dir)
+    if (cli.no_multiple_geometries is False):
+        L, absorbed, absorbed_std, reflected, reflected_std, transmitted, transmitted_std = load_simulation_data(f'out/{data["run"]["run_name"]}/data/simulations_output.txt')
+        plot_probabilities(L, absorbed, absorbed_std, reflected, reflected_std, transmitted, transmitted_std, data, output_dir)
 
     if data['run'].get("save_hist", False):
         plot_trajectories(data, output_dir)
