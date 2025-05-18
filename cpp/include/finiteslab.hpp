@@ -19,7 +19,7 @@ public:
 
     virtual ~FiniteSlab() = default;
 
-    bool isWithinBounds(const Neutron& particle) const override;
+    bool isWithinBounds(const Particle& particle) const override;
     
 };
 

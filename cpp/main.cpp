@@ -1,4 +1,5 @@
 #include "neutron.hpp"
+#include "chargedparticle.hpp"
 #include "basematerial.hpp"
 #include "regularslab.hpp"
 #include "sphere.hpp"
@@ -63,6 +64,12 @@ void validate_config(const json& config, ConfigError& error) {
     check_json_field(config["particle"]["vx"], "particle.vx", error);
     check_json_field(config["particle"]["vy"], "particle.vy", error);
     check_json_field(config["particle"]["vz"], "particle.vz", error);
+    check_json_field(config["particle"]["type"], "particle.type", error);
+
+    std::string type = config["particle"]["type"];
+    if (type == "charged") {
+        check_json_field(config["particle"]["charge"], "particle.charge", error);
+    }
 
     if (!config["geometry"]["shape"].is_null()) {
         std::string shape = config["geometry"]["shape"];
@@ -150,20 +157,18 @@ int main(int argc, char* argv[]) {
     double vx = config["particle"]["vx"];
     double vy = config["particle"]["vy"];
     double vz = config["particle"]["vz"];
+    std::string particle_type = config["particle"]["type"];
+
+    // Para partículas cargadas, cargamos carga
+    double charge = 0.0;
+    if (particle_type == "charged") {
+        charge = config["particle"]["charge"];
+    }
 
     std::unique_ptr<BaseMaterial> material;
-    
     try {
         if (shape == "regular_slab") {
-            if (config["material"]["A"].is_null()){
-                material = std::make_unique<RegularSlab>(
-                    config["material"]["mean_free_path"],
-                    config["material"]["pabs"],
-                    config["material"]["k"],
-                    length,
-                    config["geometry"]["x_init"]
-                );
-            } else {
+            if (config["material"].contains("A") && !config["material"]["A"].is_null()) {
                 material = std::make_unique<RegularSlab>(
                     config["material"]["mean_free_path"],
                     config["material"]["pabs"],
@@ -172,58 +177,63 @@ int main(int argc, char* argv[]) {
                     config["geometry"]["x_init"],
                     config["material"]["A"]
                 );
+            } else {
+                material = std::make_unique<RegularSlab>(
+                    config["material"]["mean_free_path"],
+                    config["material"]["pabs"],
+                    config["material"]["k"],
+                    length,
+                    config["geometry"]["x_init"]
+                );
             }
-
         }
         else if (shape == "sphere") {
-            if (config["material"]["A"].is_null()) {
+            if (config["material"].contains("A") && !config["material"]["A"].is_null()) {
                 material = std::make_unique<Sphere>(
-                config["material"]["mean_free_path"],
-                config["material"]["pabs"],
-                config["material"]["k"],
-                length
-            );
+                    config["material"]["mean_free_path"],
+                    config["material"]["pabs"],
+                    config["material"]["k"],
+                    length,
+                    config["material"]["A"]
+                );
             } else {
                 material = std::make_unique<Sphere>(
-                config["material"]["mean_free_path"],
-                config["material"]["pabs"],
-                config["material"]["k"],
-                length,
-                config["material"]["A"]
-            );
+                    config["material"]["mean_free_path"],
+                    config["material"]["pabs"],
+                    config["material"]["k"],
+                    length
+                );
             }
-
         }
         else if (shape == "finite_slab") {
-            if (config["material"]["A"].is_null()) {
+            if (config["material"].contains("A") && !config["material"]["A"].is_null()) {
                 material = std::make_unique<FiniteSlab>(
-                config["material"]["mean_free_path"],
-                config["material"]["pabs"],
-                config["material"]["k"],
-                config["geometry"]["x_length"],
-                config["geometry"]["y_length"],
-                length
-            );
+                    config["material"]["mean_free_path"],
+                    config["material"]["pabs"],
+                    config["material"]["k"],
+                    config["geometry"]["x_length"],
+                    config["geometry"]["y_length"],
+                    length,
+                    config["material"]["A"]
+                );
             } else {
                 material = std::make_unique<FiniteSlab>(
-                config["material"]["mean_free_path"],
-                config["material"]["pabs"],
-                config["material"]["k"],
-                config["geometry"]["x_length"],
-                config["geometry"]["y_length"],
-                length,
-                config["material"]["A"]
-            );
+                    config["material"]["mean_free_path"],
+                    config["material"]["pabs"],
+                    config["material"]["k"],
+                    config["geometry"]["x_length"],
+                    config["geometry"]["y_length"],
+                    length
+                );
             }
-
         }
         else if (shape == "double_slab") {
             material = std::make_unique<DoubleSlab>(
-                config["material"]["mean_free_path1"],
-                config["material"]["pabs1"],
+                config["material"]["mean_free_path_1"],
+                config["material"]["pabs_1"],
                 config["material"]["k1"],
-                config["material"]["mean_free_path2"],
-                config["material"]["pabs2"],
+                config["material"]["mean_free_path_2"],
+                config["material"]["pabs_2"],
                 config["material"]["k2"],
                 config["geometry"]["total_length"],
                 config["geometry"]["x_init"],
@@ -239,27 +249,35 @@ int main(int argc, char* argv[]) {
         int NumAbsorbed = 0, NumReflected = 0, NumTransmitted = 0;
 
         for (int i = 0; i < NumberSims; i++) {
-            Neutron n(x0, y0, z0, vx, vy, vz);
+            std::unique_ptr<Particle> particle;
+            if (particle_type == "neutron") {
+                particle = std::make_unique<Neutron>(x0, y0, z0, vx, vy, vz);
+            } else if (particle_type == "charged") {
+                particle = std::make_unique<ChargedParticle>(x0, y0, z0, vx, vy, vz, charge, 1.);
+            } else {
+                std::cerr << "ERROR: Unknown particle type '" << particle_type << "'\n";
+                return 1;
+            }
 
-            if (!material->isWithinBounds(n)) {
-                std::cerr << "ERROR. The neutron starts outside the material." << std::endl;
+            if (!material->isWithinBounds(*particle)) {
+                std::cerr << "ERROR. The particle starts outside the material." << std::endl;
                 return 2;
             }
 
             bool absorbed = false;
             bool reflected = false;
 
-            n.propagate(*material);
+            particle->propagate(*material);
 
-            if (!material->isWithinBounds(n)) {
+            if (!material->isWithinBounds(*particle)) {
                 reflected = true;
             } else {
-                while (material->isWithinBounds(n)) {
-                    if (n.getAbsorption(*material)) {
+                while (material->isWithinBounds(*particle)) {
+                    if (particle->getAbsorption(*material)) {
                         absorbed = true;
                         break;
                     }
-                    n.propagate(*material);
+                    particle->propagate(*material);
                 }
             }
 
@@ -269,15 +287,15 @@ int main(int argc, char* argv[]) {
 
             if (save_histories) {
                 if (absorbed && !saved_absorbed) {
-                    n.saveHistoryToFile("../out/" + run_name + "/data/hist_absorbed.txt");
+                    particle->saveHistoryToFile("../out/" + run_name + "/data/hist_absorbed.txt");
                     saved_absorbed = true;
                 } 
                 else if (reflected && !saved_reflected) {
-                    n.saveHistoryToFile("../out/" + run_name + "/data/hist_reflected.txt");
+                    particle->saveHistoryToFile("../out/" + run_name + "/data/hist_reflected.txt");
                     saved_reflected = true;
                 } 
                 else if (!reflected && !absorbed && !saved_transmitted) {
-                    n.saveHistoryToFile("../out/" + run_name + "/data/hist_transmitted.txt");
+                    particle->saveHistoryToFile("../out/" + run_name + "/data/hist_transmitted.txt");
                     saved_transmitted = true;
                 }
             }
@@ -289,11 +307,14 @@ int main(int argc, char* argv[]) {
     }
 
     double mean_abs = compute_mean(absorbed_ratios);
-    double mean_refl = compute_mean(reflected_ratios);
+    double stddev_abs = compute_stddev(absorbed_ratios, mean_abs);
+    double mean_ref = compute_mean(reflected_ratios);
+    double stddev_ref = compute_stddev(reflected_ratios, mean_ref);
     double mean_trans = compute_mean(transmitted_ratios);
+    double stddev_trans = compute_stddev(transmitted_ratios, mean_trans);
 
     std::cout << mean_abs << " " << compute_stddev(absorbed_ratios, mean_abs) << " "
-              << mean_refl << " " << compute_stddev(reflected_ratios, mean_refl) << " "
+              << mean_ref << " " << compute_stddev(reflected_ratios, mean_ref) << " "
               << mean_trans << " " << compute_stddev(transmitted_ratios, mean_trans) << std::endl;
 
     return 0;

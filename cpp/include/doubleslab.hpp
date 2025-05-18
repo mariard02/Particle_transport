@@ -1,7 +1,7 @@
 #ifndef DOUBLESLAB_HPP
 #define DOUBLESLAB_HPP
 
-#include "neutron.hpp"
+#include "particle.hpp"
 #include "regularslab.hpp"
 #include <memory>
 
@@ -34,7 +34,7 @@ public:
 
     double getRatio() const { return ratio; }
 
-    bool isWithinBounds(const Neutron& particle) const override;
+    bool isWithinBounds(const Particle& particle) const override;
 
     virtual ~DoubleSlab() = default;
 };

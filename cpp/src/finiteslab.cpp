@@ -1,7 +1,7 @@
 #include "finiteslab.hpp"
-#include "neutron.hpp"
+#include "particle.hpp"
 
-bool FiniteSlab::isWithinBounds(const  Neutron& particle) const {
+bool FiniteSlab::isWithinBounds(const  Particle& particle) const {
     double x = particle.getPosition()[0];
     double y = particle.getPosition()[1];
     double z = particle.getPosition()[2];

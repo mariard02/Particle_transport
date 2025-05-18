@@ -1,26 +1,28 @@
 {
   "run": {
-    "run_name": "jeje",
-    "simulations": 100
+    "run_name": "ch",
+    "simulations": 500
   },
   "particle": {
+    "type": "charged",
     "x": 0,
     "y": 0,
     "z": 0,
     "vx": 0.5,
     "vy": 0,
-    "vz": 0
+    "vz": 0,
+    "charge": 1
   },
   "material": {
     "mean_free_path": 0.5,
     "pabs": 0.1,
     "k": 0.01,
-    "A": 50
+    "A": null
   },
   "geometry": {
-    "shape": "sphere",
-    "min_scale": 20,
-    "max_scale": 2,
-    "scale": 10
+    "shape": "regular_slab",
+    "min_scale": 1,
+    "max_scale": 10,
+    "x_init": 0
   }
 }

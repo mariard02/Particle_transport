@@ -18,7 +18,7 @@ public:
 
     virtual ~Sphere() = default;
 
-    bool isWithinBounds(const Neutron& particle) const override;
+    bool isWithinBounds(const Particle& particle) const override;
 };
 
 #endif

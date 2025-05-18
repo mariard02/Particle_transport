@@ -1,7 +1,7 @@
 #include "sphere.hpp"
-#include "neutron.hpp"
+#include "particle.hpp"
 
-bool Sphere::isWithinBounds(const  Neutron& particle) const {
+bool Sphere::isWithinBounds(const  Particle& particle) const {
     double x = particle.getPosition()[0];
     double y = particle.getPosition()[1];
     double z = particle.getPosition()[2];

@@ -30,11 +30,35 @@
               <option value="sphere">Sphere</option>
               <option value="double_slab">Double Slab</option>
             </select>
+          </label>          
+          <label>
+            <div class="identifier">Particle type:</div>
+            <select id="particle_type" required>
+              <option value="">-- Choose --</option>
+              <option value="neutron">Neutron</option>
+              <option value="charged">Charged particle</option>
+            </select>
           </label>
           <label for="save-histories" class="checkbox-label">
             <input type="checkbox" id="save-histories" value="True" />
             <div class="identifier">Save histories</div>
           </label>
+        </div>
+      </div>
+
+      <div id="charged-particle-options" class="hidden">
+        <div class="config-group">
+          <div class="config-group-title">Charged Particle Properties</div>
+          <div class="field-row">
+            <label>
+              <div class="identifier">Charge (e):</div>
+              <input type="number" id="charge" step="0.01" />
+            </label>
+            <label>
+              <div class="identifier">Mass (u):</div>
+              <input type="number" id="mass" step="0.01" />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -301,12 +325,26 @@
       let isConfigSaved = false; 
 
       const checkbox = document.getElementById("save-histories");
+      const particleTypeSelect = document.getElementById('particle_type');
+      const chargedParticleOptions = document.getElementById('charged-particle-options');
 
       const shapeSelect = document.getElementById('shape');
       const slabOptions = document.getElementById('slab-options');
       const sphereOptions = document.getElementById('sphere-options');
       const finiteSlabOptions = document.getElementById('finite-slab-options');
       const doubleSlabOptions = document.getElementById('double-slab-options')
+
+      particleTypeSelect.addEventListener('change', () => {
+        if (particleTypeSelect.value === 'charged') {
+          chargedParticleOptions.classList.remove('hidden');
+        } else {
+          chargedParticleOptions.classList.add('hidden');
+        }
+        
+        submitButton.disabled = !form.checkValidity();
+        runScriptButton.disabled = true; 
+        isConfigSaved = false;
+      });
 
       shapeSelect.addEventListener('change', () => {
         slabOptions.classList.add('hidden');
@@ -347,12 +385,14 @@
             simulations: parseInt(document.getElementById('simulations').value),
           },
           particle: {
+            type: particleTypeSelect.value,
             x: parseFloat(document.getElementById('x').value),
             y: parseFloat(document.getElementById('y').value),
             z: parseFloat(document.getElementById('z').value),
             vx: parseFloat(document.getElementById('vx').value),
             vy: parseFloat(document.getElementById('vy').value),
             vz: parseFloat(document.getElementById('vz').value),
+            charge: parseFloat(document.getElementById('charge').value)
           },
           material: {
 

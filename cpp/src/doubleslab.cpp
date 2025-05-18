@@ -1,7 +1,7 @@
 #include "doubleslab.hpp"
-#include "neutron.hpp"
+#include "particle.hpp"
 
-bool DoubleSlab::isWithinBounds(const  Neutron& particle) const {
+bool DoubleSlab::isWithinBounds(const  Particle& particle) const {
     double x = particle.getPosition()[0];
     return x >= xinit && x <= xinit + totalLength;
 }
