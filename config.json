@@ -1,17 +1,16 @@
 {
   "run": {
-    "run_name": "ch",
+    "run_name": "neutron",
     "simulations": 500
   },
   "particle": {
-    "type": "charged",
+    "type": "neutron",
     "x": 0,
     "y": 0,
     "z": 0,
     "vx": 0.5,
     "vy": 0,
-    "vz": 0,
-    "charge": 1
+    "vz": 0
   },
   "material": {
     "mean_free_path": 0.5,
