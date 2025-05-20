@@ -6,6 +6,7 @@
 #include <string> 
 #include "particle.hpp"
 #include "basematerial.hpp"
+#include "doubleslab.hpp"
 
 class DoubleSlab;
 
@@ -23,9 +24,11 @@ public:
     std::array<double, 3> getThermalStep(const BaseMaterial& material);
 
     void elasticScatter(const BaseMaterial&  material);
+    void applyDragForce(const BaseMaterial& material);
     void propagate(const BaseMaterial&  material) override;
-    void propagate(const DoubleSlab doubleSlab);
+    void propagate(const DoubleSlab& doubleSlab);
     bool getAbsorption(const BaseMaterial&  material) const override;
+    bool getAbsorption(const DoubleSlab&  material) const;
 };
 
 #endif

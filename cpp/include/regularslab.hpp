@@ -9,10 +9,11 @@ private:
     double xinit;
 
 public:
-    RegularSlab(double lambda, double pabs, double k, double length, double xinit, double atomicMass = -1.0)
-        : BaseMaterial(lambda, pabs, k, atomicMass), length(length), xinit(xinit) {}
+    RegularSlab(double lambda, double pabs, double k, double length, double xinit, double stoppingPower = 0.0, double atomicMass = -1.0)
+        : BaseMaterial(lambda, pabs, k, atomicMass, stoppingPower), length(length), xinit(xinit) {}
 
     double getLength() const {return length;}
+    double getXInit() const {return xinit;}
 
     virtual ~RegularSlab() = default;
 

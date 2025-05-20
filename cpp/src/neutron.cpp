@@ -5,7 +5,7 @@
 #include <cmath>
 #include <utility>
 
-// Constructor
+
 Neutron::Neutron(double x, double y, double z, double vx, double vy, double vz)
     : Particle(x, y, z, vx, vy, vz) 
 {
@@ -66,6 +66,13 @@ void Neutron::elasticScatter(const BaseMaterial&  material) {
     velocity = {v_final * ux, v_final * uy, v_final * uz};
 }
 
+void Neutron::applyDragForce(const BaseMaterial& material) {
+    double k = material.getK();
+    for (int i = 0; i < 3; ++i) {
+        velocity[i] *= (1.0 - k);
+    }
+}
+
 bool Neutron::getAbsorption(const BaseMaterial&  material) const{
     std::random_device rd;  
     std::mt19937 gen(rd()); 
@@ -73,11 +80,36 @@ bool Neutron::getAbsorption(const BaseMaterial&  material) const{
     int min = 0, max = 1;
     std::uniform_real_distribution<> distrib(min, max);
 
+    if (const DoubleSlab* slab = dynamic_cast<const DoubleSlab*>(&material)) {
+       return getAbsorption(*slab);
+    }
+
     return distrib(gen) < material.getPabs();
+}
+
+bool Neutron::getAbsorption(const DoubleSlab& material) const{
+    std::random_device rd;  
+    std::mt19937 gen(rd()); 
+
+    int min = 0, max = 1;
+    std::uniform_real_distribution<> distrib(min, max);
+
+    if (material.getMaterial1().isWithinBounds(*this)) {
+        return distrib(gen) < material.getMaterial1().getPabs();
+    } else if (material.getMaterial2().isWithinBounds(*this)) {
+        return distrib(gen) < material.getMaterial2().getPabs();
+    }
+
+    return false;
 }
 
 void Neutron::propagate(const BaseMaterial&  material) {
     std::array<double, 3> thermalStep = getThermalStep(material);
+
+    if (const DoubleSlab* slab = dynamic_cast<const DoubleSlab*>(&material)) {
+        propagate(*slab);
+        return;
+    }
 
     for (int i = 0; i < 3; ++i) {
         position[i] += thermalStep[i] + velocity[i];
@@ -88,54 +120,16 @@ void Neutron::propagate(const BaseMaterial&  material) {
     if (material.hasElasticScattering()) {
         elasticScatter(material);
     } else {
-        double k = material.getK(); 
-        for (int i = 0; i < 3; ++i) {
-            velocity[i] *= (1.0 - k);
-        }
-    }
-
-}
-
-void Neutron::propagate(const DoubleSlab  doubleSlab) {
-
-    while (doubleSlab.getMaterial1().isWithinBounds(*this)) {
-        std::array<double, 3> thermalStep = getThermalStep(doubleSlab.getMaterial1());
-
-        for (int i = 0; i < 3; ++i) {
-            position[i] += thermalStep[i] + velocity[i];
-        }
-
-        appendHistory();
-
-        double k = doubleSlab.getMaterial1().getK();
-        for (int i = 0; i < 3; ++i) {
-            velocity[i] *= (1.0 - k);
-        }
-
-        if (getAbsorption(doubleSlab.getMaterial1())) {
-            return;
-        }
-    }
-
-    while (doubleSlab.getMaterial2().isWithinBounds(*this)) {
-        std::array<double, 3> thermalStep = getThermalStep(doubleSlab.getMaterial2());
-
-        for (int i = 0; i < 3; ++i) {
-            position[i] += thermalStep[i] + velocity[i];
-        }
-
-        appendHistory();
-
-        double k = doubleSlab.getMaterial2().getK();
-        for (int i = 0; i < 3; ++i) {
-            velocity[i] *= (1.0 - k);
-        }
-
-        if (getAbsorption(doubleSlab.getMaterial2())) {
-            return;
-        }
+        applyDragForce(material);
     }
 }
 
+void Neutron::propagate(const DoubleSlab&  doubleSlab) {
+    if (doubleSlab.getMaterial1().isWithinBounds(*this)) {
+        propagate(doubleSlab.getMaterial1());
+    }
 
-
+    if (doubleSlab.getMaterial2().isWithinBounds(*this)) {
+        propagate(doubleSlab.getMaterial2());
+    }
+}

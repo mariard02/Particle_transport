@@ -97,11 +97,11 @@ void validate_config(const json& config, ConfigError& error) {
         }
         else if (shape == "double_slab") {
             check_json_field(config["material"], "material", error);
-            check_json_field(config["material"]["mean_free_path_1"], "material.mean_free_path_1", error);
-            check_json_field(config["material"]["pabs_1"], "material.pabs_1", error);
+            check_json_field(config["material"]["mean_free_path1"], "material.mean_free_path1", error);
+            check_json_field(config["material"]["pabs1"], "material.pabs_1", error);
             check_json_field(config["material"]["k1"], "material.k1", error);
-            check_json_field(config["material"]["mean_free_path_2"], "material.mean_free_path_2", error);
-            check_json_field(config["material"]["pabs_2"], "material.pabs_2", error);
+            check_json_field(config["material"]["mean_free_path2"], "material.mean_free_path2", error);
+            check_json_field(config["material"]["pabs2"], "material.pabs2", error);
             check_json_field(config["material"]["k2"], "material.k2", error);
             check_json_field(config["geometry"]["total_length"], "geometry.total_length", error);
             check_json_field(config["geometry"]["x_init"], "geometry.x_init", error);
@@ -148,8 +148,8 @@ int main(int argc, char* argv[]) {
 
     std::__fs::filesystem::create_directories("../out/" + run_name + "/data");
 
-    std::vector<double> absorbed_ratios, reflected_ratios, transmitted_ratios;
-    bool saved_absorbed = false, saved_reflected = false, saved_transmitted = false;
+    std::vector<double> absorbed_ratios, reflected_ratios, scaped_ratios;
+    bool saved_absorbed = false, saved_reflected = false, saved_scaped = false;
 
     double x0 = config["particle"]["x"];
     double y0 = config["particle"]["y"];
@@ -159,7 +159,6 @@ int main(int argc, char* argv[]) {
     double vz = config["particle"]["vz"];
     std::string particle_type = config["particle"]["type"];
 
-    // Para partículas cargadas, cargamos carga
     double charge = 0.0;
     if (particle_type == "charged") {
         charge = config["particle"]["charge"];
@@ -229,15 +228,17 @@ int main(int argc, char* argv[]) {
         }
         else if (shape == "double_slab") {
             material = std::make_unique<DoubleSlab>(
-                config["material"]["mean_free_path_1"],
-                config["material"]["pabs_1"],
+                config["material"]["mean_free_path1"],
+                config["material"]["pabs1"],
                 config["material"]["k1"],
-                config["material"]["mean_free_path_2"],
-                config["material"]["pabs_2"],
+                config["material"]["mean_free_path2"],
+                config["material"]["pabs2"],
                 config["material"]["k2"],
                 config["geometry"]["total_length"],
                 config["geometry"]["x_init"],
-                length
+                length, 
+                0.01,
+                0.02
             );
         }
     } catch (const std::exception& e) {
@@ -246,7 +247,7 @@ int main(int argc, char* argv[]) {
     }
 
     for (int run = 0; run < 10; run++) {
-        int NumAbsorbed = 0, NumReflected = 0, NumTransmitted = 0;
+        int NumAbsorbed = 0, NumReflected = 0, NumScaped = 0;
 
         for (int i = 0; i < NumberSims; i++) {
             std::unique_ptr<Particle> particle;
@@ -267,23 +268,34 @@ int main(int argc, char* argv[]) {
             bool absorbed = false;
             bool reflected = false;
 
+            double xinit = 0.0;
+            if (shape == "regular_slab" || shape == "double_slab") {
+                if (const RegularSlab* slabPtr = dynamic_cast<const RegularSlab*>(material.get())) {
+                    xinit = slabPtr->getXInit();
+                }
+            }
+
             particle->propagate(*material);
 
-            if (!material->isWithinBounds(*particle)) {
-                reflected = true;
-            } else {
-                while (material->isWithinBounds(*particle)) {
-                    if (particle->getAbsorption(*material)) {
-                        absorbed = true;
-                        break;
-                    }
-                    particle->propagate(*material);
+            while (material->isWithinBounds(*particle)) {
+                if (particle->getAbsorption(*material)) {
+                    absorbed = true;
+                    break;
+                }
+                particle->propagate(*material);
+            }
+
+            if (!absorbed && (shape == "regular_slab" || shape == "double_slab")) {
+                double x = particle->getPosition()[0];
+
+                if (x < xinit) {
+                    reflected = true;
                 }
             }
 
             if (absorbed) NumAbsorbed++;
             else if (reflected) NumReflected++;
-            else NumTransmitted++;
+            else NumScaped++;
 
             if (save_histories) {
                 if (absorbed && !saved_absorbed) {
@@ -294,28 +306,28 @@ int main(int argc, char* argv[]) {
                     particle->saveHistoryToFile("../out/" + run_name + "/data/hist_reflected.txt");
                     saved_reflected = true;
                 } 
-                else if (!reflected && !absorbed && !saved_transmitted) {
-                    particle->saveHistoryToFile("../out/" + run_name + "/data/hist_transmitted.txt");
-                    saved_transmitted = true;
+                else if (!reflected && !absorbed && !saved_scaped) {
+                    particle->saveHistoryToFile("../out/" + run_name + "/data/hist_scaped.txt");
+                    saved_scaped = true;
                 }
             }
         }
 
         absorbed_ratios.push_back(static_cast<double>(NumAbsorbed) / NumberSims);
         reflected_ratios.push_back(static_cast<double>(NumReflected) / NumberSims);
-        transmitted_ratios.push_back(static_cast<double>(NumTransmitted) / NumberSims);
+        scaped_ratios.push_back(static_cast<double>(NumScaped) / NumberSims);
     }
 
     double mean_abs = compute_mean(absorbed_ratios);
     double stddev_abs = compute_stddev(absorbed_ratios, mean_abs);
     double mean_ref = compute_mean(reflected_ratios);
     double stddev_ref = compute_stddev(reflected_ratios, mean_ref);
-    double mean_trans = compute_mean(transmitted_ratios);
-    double stddev_trans = compute_stddev(transmitted_ratios, mean_trans);
+    double mean_sc = compute_mean(scaped_ratios);
+    double stddev_sc = compute_stddev(scaped_ratios, mean_sc);
 
-    std::cout << mean_abs << " " << compute_stddev(absorbed_ratios, mean_abs) << " "
-              << mean_ref << " " << compute_stddev(reflected_ratios, mean_ref) << " "
-              << mean_trans << " " << compute_stddev(transmitted_ratios, mean_trans) << std::endl;
+    std::cout << mean_abs << " " << stddev_abs << " "
+              << mean_ref << " " << stddev_ref << " "
+              << mean_sc << " " << stddev_sc << std::endl;
 
     return 0;
 }

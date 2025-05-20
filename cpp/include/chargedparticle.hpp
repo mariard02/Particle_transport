@@ -2,6 +2,7 @@
 #define CHARGEDPARTICLE_HPP
 #include "particle.hpp"
 #include "basematerial.hpp"
+#include "doubleslab.hpp"
 
 class ChargedParticle : public Particle {
 public:
@@ -15,6 +16,7 @@ public:
 
     bool getAbsorption(const BaseMaterial& material) const override;
     bool isAbsorbed() const;
+    void propagate(const DoubleSlab& doubleSlab);
 
 protected:
     double charge;

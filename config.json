@@ -1,16 +1,19 @@
 {
   "run": {
-    "run_name": "neutron",
-    "simulations": 500
+    "run_name": "ch",
+    "simulations": 1000,
+    "save_hist": "True"
   },
   "particle": {
     "type": "neutron",
     "x": 0,
     "y": 0,
     "z": 0,
-    "vx": 0.5,
+    "vx": 0,
     "vy": 0,
-    "vz": 0
+    "vz": 0.5,
+    "charge": null,
+    "mass": null
   },
   "material": {
     "mean_free_path": 0.5,
@@ -19,9 +22,10 @@
     "A": null
   },
   "geometry": {
-    "shape": "regular_slab",
+    "shape": "finite_slab",
+    "x_length": 10,
+    "y_length": 10,
     "min_scale": 1,
-    "max_scale": 10,
-    "x_init": 0
+    "max_scale": 10
   }
 }

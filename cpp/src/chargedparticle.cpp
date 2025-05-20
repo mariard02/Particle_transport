@@ -1,4 +1,5 @@
 #include "chargedparticle.hpp"
+#include "doubleslab.hpp"
 #include <random>
 #include <cmath>
 
@@ -56,8 +57,26 @@ void ChargedParticle::applyDragForce(const BaseMaterial& material) {
     }
 }
 
+bool ChargedParticle::getAbsorption(const BaseMaterial& material) const {
+    if (is_absorbed) return true;
+
+    std::random_device rd;  
+    std::mt19937 gen(rd()); 
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+    return distrib(gen) < material.getPabs();
+}
+
+bool ChargedParticle::isAbsorbed() const {
+    return is_absorbed;
+}
+
 void ChargedParticle::propagate(const BaseMaterial& material) {
     if (is_absorbed) return;
+    if (const DoubleSlab* slab = dynamic_cast<const DoubleSlab*>(&material)){
+        propagate(*slab);
+        return;
+    }
 
     std::array<double, 3> thermalStep = getThermalStep(material);
 
@@ -79,16 +98,12 @@ void ChargedParticle::propagate(const BaseMaterial& material) {
     }
 }
 
-bool ChargedParticle::getAbsorption(const BaseMaterial& material) const {
-    if (is_absorbed) return true;
+void ChargedParticle::propagate(const DoubleSlab&  doubleSlab) {
+    if (doubleSlab.getMaterial1().isWithinBounds(*this)) {
+        propagate(doubleSlab.getMaterial1());
+    }
 
-    std::random_device rd;  
-    std::mt19937 gen(rd()); 
-    std::uniform_real_distribution<> distrib(0.0, 1.0);
-
-    return distrib(gen) < material.getPabs();
-}
-
-bool ChargedParticle::isAbsorbed() const {
-    return is_absorbed;
+    if (doubleSlab.getMaterial2().isWithinBounds(*this)) {
+        propagate(doubleSlab.getMaterial2());
+    }
 }

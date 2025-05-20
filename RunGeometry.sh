@@ -50,7 +50,7 @@ mkdir -p "$output_dir" || { echo "Error creating output directory $output_dir" >
 cd cpp || { echo "Error entering cpp directory" >&2; exit 1; }
 
 output_file="$output_dir/simulations_output.txt"
-echo "Length (L) Absorbed std Reflected std Transmitted std" > "$output_file" || { echo "Error creating output file" >&2; exit 1; }
+echo "Scale Absorbed std Reflected std Scaped std" > "$output_file" || { echo "Error creating output file" >&2; exit 1; }
 
 # Compile
 g++ -std=c++14 -Iinclude main.cpp src/*.cpp -o simulation || {
