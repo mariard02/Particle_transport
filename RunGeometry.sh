@@ -71,4 +71,4 @@ python3 plot_particle_transport.py --configuration "$json_file" --no_multiple_ge
     exit 1
 }
 
-echo "Simulation and plotting completed successfully."
+echo "Simulation completed successfully."
