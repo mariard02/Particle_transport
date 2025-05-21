@@ -1,37 +1,13 @@
 #include "neutron.hpp"
 #include "chargedparticle.hpp"
 #include "basematerial.hpp"
-#include "regularslab.hpp"
-#include "sphere.hpp"
-#include "finiteslab.hpp"
-#include "doubleslab.hpp"
+#include "materialfactory.hpp"
 #include <iostream>
 #include <fstream>
 #include <random>
 #include <cmath>
 #include <vector>
 #include <string>
-#include "json.hpp"
-
-using json = nlohmann::json;
-
-struct ConfigError {
-    std::vector<std::string> errors;
-    
-    void add_error(const std::string& error) {
-        errors.push_back(error);
-    }
-    
-    bool has_errors() const {
-        return !errors.empty();
-    }
-    
-    void print_errors() const {
-        for (const auto& err : errors) {
-            std::cerr << err << std::endl;
-        }
-    }
-};
 
 double compute_mean(const std::vector<double>& values) {
     double sum = 0.0;
@@ -43,73 +19,6 @@ double compute_stddev(const std::vector<double>& values, double mean) {
     double sum = 0.0;
     for (double v : values) sum += (v - mean) * (v - mean);
     return std::sqrt(sum / values.size());
-}
-
-void check_json_field(const json& j, const std::string& path, ConfigError& error) {
-    if (j.is_null()) {
-        error.add_error("Error: Required configuration value '" + path + "' is null or missing");
-    }
-}
-
-void validate_config(const json& config, ConfigError& error) {
-    check_json_field(config["run"], "run", error);
-    check_json_field(config["run"]["simulations"], "run.simulations", error);
-    check_json_field(config["run"]["run_name"], "run.run_name", error);
-    check_json_field(config["geometry"], "geometry", error);
-    check_json_field(config["geometry"]["shape"], "geometry.shape", error);
-    check_json_field(config["particle"], "particle", error);
-    check_json_field(config["particle"]["x"], "particle.x", error);
-    check_json_field(config["particle"]["y"], "particle.y", error);
-    check_json_field(config["particle"]["z"], "particle.z", error);
-    check_json_field(config["particle"]["vx"], "particle.vx", error);
-    check_json_field(config["particle"]["vy"], "particle.vy", error);
-    check_json_field(config["particle"]["vz"], "particle.vz", error);
-    check_json_field(config["particle"]["type"], "particle.type", error);
-
-    std::string type = config["particle"]["type"];
-    if (type == "charged") {
-        check_json_field(config["particle"]["charge"], "particle.charge", error);
-    }
-
-    if (!config["geometry"]["shape"].is_null()) {
-        std::string shape = config["geometry"]["shape"];
-        
-        if (shape == "regular_slab") {
-            check_json_field(config["material"], "material", error);
-            check_json_field(config["material"]["mean_free_path"], "material.mean_free_path", error);
-            check_json_field(config["material"]["pabs"], "material.pabs", error);
-            check_json_field(config["material"]["k"], "material.k", error);
-            check_json_field(config["geometry"]["x_init"], "geometry.x_init", error);
-        }
-        else if (shape == "sphere") {
-            check_json_field(config["material"], "material", error);
-            check_json_field(config["material"]["mean_free_path"], "material.mean_free_path", error);
-            check_json_field(config["material"]["pabs"], "material.pabs", error);
-            check_json_field(config["material"]["k"], "material.k", error);
-        }
-        else if (shape == "finite_slab") {
-            check_json_field(config["material"], "material", error);
-            check_json_field(config["material"]["mean_free_path"], "material.mean_free_path", error);
-            check_json_field(config["material"]["pabs"], "material.pabs", error);
-            check_json_field(config["material"]["k"], "material.k", error);
-            check_json_field(config["geometry"]["x_length"], "geometry.x_length", error);
-            check_json_field(config["geometry"]["y_length"], "geometry.y_length", error);
-        }
-        else if (shape == "double_slab") {
-            check_json_field(config["material"], "material", error);
-            check_json_field(config["material"]["mean_free_path1"], "material.mean_free_path1", error);
-            check_json_field(config["material"]["pabs1"], "material.pabs_1", error);
-            check_json_field(config["material"]["k1"], "material.k1", error);
-            check_json_field(config["material"]["mean_free_path2"], "material.mean_free_path2", error);
-            check_json_field(config["material"]["pabs2"], "material.pabs2", error);
-            check_json_field(config["material"]["k2"], "material.k2", error);
-            check_json_field(config["geometry"]["total_length"], "geometry.total_length", error);
-            check_json_field(config["geometry"]["x_init"], "geometry.x_init", error);
-        }
-        else {
-            error.add_error("ERROR. Geometry not supported: " + shape);
-        }
-    }
 }
 
 int main(int argc, char* argv[]) {
@@ -133,7 +42,8 @@ int main(int argc, char* argv[]) {
     }
 
     ConfigError config_error;
-    validate_config(config, config_error);
+    MaterialFactory configuration;
+    configuration.validate_config(config, config_error);
     
     if (config_error.has_errors()) {
         config_error.print_errors();
@@ -160,87 +70,16 @@ int main(int argc, char* argv[]) {
     std::string particle_type = config["particle"]["type"];
 
     double charge = 0.0;
+    double mass = 0.0;
     if (particle_type == "charged") {
         charge = config["particle"]["charge"];
+        mass = config["particle"]["mass"];
     }
 
     std::unique_ptr<BaseMaterial> material;
     try {
-        if (shape == "regular_slab") {
-            if (config["material"].contains("A") && !config["material"]["A"].is_null()) {
-                material = std::make_unique<RegularSlab>(
-                    config["material"]["mean_free_path"],
-                    config["material"]["pabs"],
-                    config["material"]["k"],
-                    length,
-                    config["geometry"]["x_init"],
-                    config["material"]["A"]
-                );
-            } else {
-                material = std::make_unique<RegularSlab>(
-                    config["material"]["mean_free_path"],
-                    config["material"]["pabs"],
-                    config["material"]["k"],
-                    length,
-                    config["geometry"]["x_init"]
-                );
-            }
-        }
-        else if (shape == "sphere") {
-            if (config["material"].contains("A") && !config["material"]["A"].is_null()) {
-                material = std::make_unique<Sphere>(
-                    config["material"]["mean_free_path"],
-                    config["material"]["pabs"],
-                    config["material"]["k"],
-                    length,
-                    config["material"]["A"]
-                );
-            } else {
-                material = std::make_unique<Sphere>(
-                    config["material"]["mean_free_path"],
-                    config["material"]["pabs"],
-                    config["material"]["k"],
-                    length
-                );
-            }
-        }
-        else if (shape == "finite_slab") {
-            if (config["material"].contains("A") && !config["material"]["A"].is_null()) {
-                material = std::make_unique<FiniteSlab>(
-                    config["material"]["mean_free_path"],
-                    config["material"]["pabs"],
-                    config["material"]["k"],
-                    config["geometry"]["x_length"],
-                    config["geometry"]["y_length"],
-                    length,
-                    config["material"]["A"]
-                );
-            } else {
-                material = std::make_unique<FiniteSlab>(
-                    config["material"]["mean_free_path"],
-                    config["material"]["pabs"],
-                    config["material"]["k"],
-                    config["geometry"]["x_length"],
-                    config["geometry"]["y_length"],
-                    length
-                );
-            }
-        }
-        else if (shape == "double_slab") {
-            material = std::make_unique<DoubleSlab>(
-                config["material"]["mean_free_path1"],
-                config["material"]["pabs1"],
-                config["material"]["k1"],
-                config["material"]["mean_free_path2"],
-                config["material"]["pabs2"],
-                config["material"]["k2"],
-                config["geometry"]["total_length"],
-                config["geometry"]["x_init"],
-                length, 
-                0.01,
-                0.02
-            );
-        }
+        bool isCharged = (particle_type == "charged");
+        material = configuration.createMaterial(config, shape, length, isCharged);
     } catch (const std::exception& e) {
         std::cerr << "Error creating material: " << e.what() << std::endl;
         return 1;
@@ -254,7 +93,7 @@ int main(int argc, char* argv[]) {
             if (particle_type == "neutron") {
                 particle = std::make_unique<Neutron>(x0, y0, z0, vx, vy, vz);
             } else if (particle_type == "charged") {
-                particle = std::make_unique<ChargedParticle>(x0, y0, z0, vx, vy, vz, charge, 1.);
+                particle = std::make_unique<ChargedParticle>(x0, y0, z0, vx, vy, vz, charge, mass);
             } else {
                 std::cerr << "ERROR: Unknown particle type '" << particle_type << "'\n";
                 return 1;

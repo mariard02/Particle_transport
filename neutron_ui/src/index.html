@@ -137,6 +137,10 @@
               <div class="identifier">A:</div>
               <input type="number" step="0.01" id="A" />
             </label>
+            <label>
+              <div class="identifier">Absorption power:</div>
+              <input type="number" step="0.01" id="abs" />
+            </label>
           </div>
         </div>
       </div>
@@ -176,6 +180,10 @@
             <label>
               <div class="identifier">A:</div>
               <input type="number" step="0.01" id="A_sphere" />
+            </label>
+            <label>
+              <div class="identifier">Absorption power:</div>
+              <input type="number" step="0.01" id="abs_sphere" />
             </label>
           </div>
         </div>
@@ -227,6 +235,10 @@
               <div class="identifier">A:</div>
               <input type="number" step="0.01" id="A_finite" />
             </label>
+            <label>
+              <div class="identifier">Absorption power:</div>
+              <input type="number" step="0.01" id="abs_finite" />
+            </label>
           </div>
         </div>
       </div>
@@ -277,6 +289,10 @@
               <div class="identifier">A:</div>
               <input type="number" step="0.01" id="A1" />
             </label>
+            <label>
+              <div class="identifier">Absorption power:</div>
+              <input type="number" step="0.01" id="abs1" />
+            </label>
           </div>
         </div>
 
@@ -300,6 +316,10 @@
             <label>
               <div class="identifier">A:</div>
               <input type="number" step="0.01" id="A2" />
+            </label>
+            <label>
+              <div class="identifier">Absorption power:</div>
+              <input type="number" step="0.01" id="abs2" />
             </label>
           </div>
         </div>
@@ -412,6 +432,7 @@
           data.material.pabs = parseFloat(document.getElementById('pabs').value);
           data.material.k = parseFloat(document.getElementById('k').value);
           data.material.A = parseFloat(document.getElementById('A').value);
+          data.material.absorption_power = parseFloat(document.getAnimations('abs').value);
           data.geometry.min_scale = parseFloat(document.getElementById('min_slab_thickness').value);
           data.geometry.max_scale = parseFloat(document.getElementById('max_slab_thickness').value);
           data.geometry.x_init = parseFloat(document.getElementById('slab_position').value)
@@ -420,6 +441,7 @@
           data.material.pabs = parseFloat(document.getElementById('pabs_sphere').value);
           data.material.k = parseFloat(document.getElementById('k_sphere').value);
           data.material.A = parseFloat(document.getElementById('A_sphere').value);
+          data.material.absorption_power = parseFloat(document.getAnimations('abs_sphere').value);
           data.geometry.min_scale = parseFloat(document.getElementById('min_sphere_radius').value)
           data.geometry.max_scale = parseFloat(document.getElementById('max_sphere_radius').value)
         } else if (shape === 'finite_slab') {
@@ -427,6 +449,7 @@
           data.material.pabs = parseFloat(document.getElementById('pabs_finite').value);
           data.material.k = parseFloat(document.getElementById('k_finite').value);
           data.material.A = parseFloat(document.getElementById('A_finite').value);
+          data.material.absorption_power = parseFloat(document.getAnimations('abs_finite').value);
           data.geometry.x_length = parseFloat(document.getElementById('x_length').value);
           data.geometry.y_length = parseFloat(document.getElementById('y_length').value);
           data.geometry.min_scale = parseFloat(document.getElementById('min_length').value);
@@ -445,6 +468,8 @@
           data.material.k2 = parseFloat(document.getElementById('k2').value);
           data.material.A1 = parseFloat(document.getElementById('A1').value);
           data.material.A2 = parseFloat(document.getElementById('A2').value);
+          data.material.absorption_power = parseFloat(document.getAnimations('abs1').value);
+          data.material.absorption_power = parseFloat(document.getAnimations('abs2').value);
         }
 
         await window.electronAPI.saveConfig(data);

@@ -10,8 +10,8 @@ private:
     double zlength;
 
 public:
-    FiniteSlab(double lambda, double pabs, double k, double xlength, double ylength, double zlength, double atomicMass = -1.0)
-        : BaseMaterial(lambda, pabs, k, atomicMass), xlength(xlength), ylength(ylength), zlength(zlength) {}
+    FiniteSlab(double lambda, double pabs, double k, double xlength, double ylength, double zlength, double stoppingPower = 0.0, double atomicMass = -1.0)
+        : BaseMaterial(lambda, pabs, k, atomicMass, stoppingPower), xlength(xlength), ylength(ylength), zlength(zlength) {}
 
     double getXLength() const {return xlength;}
     double getYLength() const {return ylength;}
