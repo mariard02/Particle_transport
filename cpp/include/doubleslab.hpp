@@ -61,6 +61,9 @@ public:
     /// @return Ratio of the total length occupied by the first material
     double getRatio() const { return ratio; }
 
+    /// @return Position of the double slab
+    double getXInit() const {return xinit;}
+
     /**
      * @brief Check if the particle is within the bounds of the double slab.
      * 

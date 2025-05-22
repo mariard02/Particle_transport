@@ -39,7 +39,7 @@ if [ -z "$scale" ]; then
     exit 1
 fi
 
-if [ 0 -gt "$scale" ]; then 
+if ! echo "$scale > 0" | bc -l | grep -q 1; then
     echo "Error: scale must be bigger than 0" >&2
     exit 1
 fi

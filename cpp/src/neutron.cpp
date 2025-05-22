@@ -104,6 +104,9 @@ bool Neutron::getAbsorption(const DoubleSlab& material) const{
 }
 
 void Neutron::propagate(const BaseMaterial&  material) {
+    
+    appendHistory();
+
     std::array<double, 3> thermalStep = getThermalStep(material);
 
     if (const DoubleSlab* slab = dynamic_cast<const DoubleSlab*>(&material)) {
@@ -114,8 +117,6 @@ void Neutron::propagate(const BaseMaterial&  material) {
     for (int i = 0; i < 3; ++i) {
         position[i] += thermalStep[i] + velocity[i];
     }
-
-    appendHistory();
 
     if (material.hasElasticScattering()) {
         elasticScatter(material);

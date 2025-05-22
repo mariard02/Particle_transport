@@ -31,7 +31,7 @@ void ChargedParticle::applyEnergyLoss(const BaseMaterial& material, double stepL
     if (is_absorbed) return;
 
     double dE_dx = material.getStoppingPower();  
-    double energyLoss = dE_dx * stepLength;
+    double energyLoss = dE_dx * stepLength * charge * charge / mass;
 
     double v_mag = sqrt(velocity[0]*velocity[0] + velocity[1]*velocity[1] + velocity[2]*velocity[2]);
     double kineticEnergy = 0.5 * mass * v_mag * v_mag;
@@ -71,12 +71,14 @@ bool ChargedParticle::isAbsorbed() const {
     return is_absorbed;
 }
 
-void ChargedParticle::propagate(const BaseMaterial& material) {
-    if (is_absorbed) return;
+void ChargedParticle::propagate(const BaseMaterial& material) {  
+    
     if (const DoubleSlab* slab = dynamic_cast<const DoubleSlab*>(&material)){
         propagate(*slab);
         return;
     }
+
+    appendHistory();
 
     std::array<double, 3> thermalStep = getThermalStep(material);
 
@@ -90,12 +92,10 @@ void ChargedParticle::propagate(const BaseMaterial& material) {
         position[i] += thermalStep[i] + velocity[i];  
     }
 
-    appendHistory();
-
     applyEnergyLoss(material, stepLength);  
-    if (!is_absorbed) {
-        applyDragForce(material);
-    }
+
+    applyDragForce(material);
+    
 }
 
 void ChargedParticle::propagate(const DoubleSlab&  doubleSlab) {

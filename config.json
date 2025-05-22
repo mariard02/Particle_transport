@@ -1,36 +1,38 @@
 {
   "run": {
-    "run_name": "1",
-    "simulations": 1
+    "run_name": "double_charged",
+    "simulations": 1000,
+    "save_hist": "True"
   },
   "particle": {
-    "type": "neutron",
+    "type": "charged",
     "x": 0,
     "y": 0,
     "z": 0,
-    "vx": 1,
-    "vy": 1,
-    "vz": 1,
-    "charge": null,
-    "mass": null
+    "vx": 0.5,
+    "vy": 0,
+    "vz": 0,
+    "charge": 1,
+    "mass": 1
   },
   "material": {
-    "mean_free_path": 1,
-    "mean_free_path2": 1,
-    "pabs": 1,
-    "pabs2": 1,
-    "k": 1,
-    "k2": 1,
-    "A": 1,
-    "A2": 1,
-    "absorption_power": null
+    "mean_free_path1": 0.5,
+    "mean_free_path2": 0.3,
+    "pabs1": 0.1,
+    "pabs2": 0.05,
+    "k1": 0.01,
+    "k2": 0.01,
+    "A1": null,
+    "A2": null,
+    "absorption_power1": 0.01,
+    "absorption_power2": 0.01
   },
   "geometry": {
-    "shape": "regular_slab",
-    "total_length": null,
-    "min_scale": null,
-    "max_scale": null,
-    "x_init": 0,
-    "scale": 10
+    "shape": "double_slab",
+    "total_length": 10,
+    "min_scale": 0.4,
+    "max_scale": 0.6,
+    "scale": 0.5,
+    "x_init": 0
   }
 }

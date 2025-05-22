@@ -1,6 +1,7 @@
 # Particle transport
 
 This project focuses on simulating the passage of neutrons through different materials and geometries.
+
 ## Usage
 
 ### Running a Simulation from a Configuration File

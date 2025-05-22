@@ -127,6 +127,10 @@ int main(int argc, char* argv[]) {
                 if (const RegularSlab* slabPtr = dynamic_cast<const RegularSlab*>(material.get())) {
                     xinit = slabPtr->getXInit();
                 }
+            } else if (shape == "double_slab") { 
+                if (const DoubleSlab* slabPtr = dynamic_cast<const DoubleSlab*>(material.get())) {
+                    xinit = slabPtr->getXInit();
+                }
             }
 
             // First propagation before checking absorption
@@ -140,6 +144,8 @@ int main(int argc, char* argv[]) {
                 }
                 particle->propagate(*material);
             }
+
+            particle->appendHistory();
 
             // Check if the particle was reflected (escaped through the entry side)
             if (!absorbed && (shape == "regular_slab" || shape == "double_slab")) {

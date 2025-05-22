@@ -19,7 +19,13 @@ void MaterialFactory::validate_config(const json& config, ConfigError& error) {
     if (type == "charged") {
         check_json_field(config["particle"]["charge"], "particle.charge", error);
         check_json_field(config["particle"]["mass"], "particle.mass", error);
-        check_json_field(config["material"]["absorption_power"], "material.absorption_power", error);
+        if (config["geometry"]["shape"] == "double_slab"){
+            check_json_field(config["material"]["absorption_power1"], "material.absorption_power1", error);
+            check_json_field(config["material"]["absorption_power2"], "material.absorption_power2", error);            
+        } else {
+            check_json_field(config["material"]["absorption_power"], "material.absorption_power", error);
+
+        }
     }
 
     if (!config["geometry"]["shape"].is_null()) {

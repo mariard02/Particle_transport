@@ -160,7 +160,7 @@ private:
         double length,
         bool isCharged
     ) {
-        if (config["material"].contains("A") && !config["material"]["A"].is_null()) {
+        if (config["material"].contains("A1") && !config["material"]["A1"].is_null() && config["material"].contains("A2") && !config["material"]["A2"].is_null()) {
             return std::make_unique<DoubleSlab>(
                 config["material"]["mean_free_path1"],
                 config["material"]["pabs1"],

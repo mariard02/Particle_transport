@@ -92,7 +92,7 @@ public:
      */
     void propagate(const DoubleSlab& doubleSlab);
 
-protected:
+private:
     double charge;        ///< Electric charge of the particle
     double mass;          ///< Mass of the particle
     bool is_absorbed;     ///< Internal flag indicating whether the particle is absorbed
