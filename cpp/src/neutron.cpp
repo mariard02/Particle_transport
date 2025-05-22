@@ -125,12 +125,47 @@ void Neutron::propagate(const BaseMaterial&  material) {
     }
 }
 
-void Neutron::propagate(const DoubleSlab&  doubleSlab) {
-    if (doubleSlab.getMaterial1().isWithinBounds(*this)) {
-        propagate(doubleSlab.getMaterial1());
+void Neutron::propagate(const DoubleSlab& doubleSlab) {
+    appendHistory();
+
+    double lambda1 = doubleSlab.getMaterial1().getLambda();
+    double lambda2 = doubleSlab.getMaterial2().getLambda();
+    double lambda_min = std::min(lambda1, lambda2);
+
+    double step_length = getRandomStepLength(doubleSlab) * lambda_min;
+
+    for (int i = 0; i < 3; ++i) {
+        position[i] += velocity[i] * step_length;
     }
 
-    if (doubleSlab.getMaterial2().isWithinBounds(*this)) {
-        propagate(doubleSlab.getMaterial2());
+    bool in_mat1 = doubleSlab.getMaterial1().isWithinBounds(*this);
+    bool in_mat2 = doubleSlab.getMaterial2().isWithinBounds(*this);
+
+    if (!in_mat1 && !in_mat2) return;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> distrib(0, 1);
+
+    double P_collision = 0.0;
+    const RegularSlab* collision_material = nullptr;
+
+    if (in_mat1 && in_mat2) {
+        P_collision = (lambda_min/lambda1 + lambda_min/lambda2) / 2.0;
+        collision_material = (distrib(gen) < lambda2/(lambda1 + lambda2)) ? 
+                           &doubleSlab.getMaterial1() : &doubleSlab.getMaterial2();
+    } 
+    else if (in_mat1) {
+        P_collision = lambda_min / lambda1;
+        collision_material = &doubleSlab.getMaterial1();
+    } 
+    else {
+        P_collision = lambda_min / lambda2;
+        collision_material = &doubleSlab.getMaterial2();
     }
+
+    if (distrib(gen) < P_collision && collision_material) {
+        propagate(*collision_material);
+    }
+
 }
