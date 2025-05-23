@@ -1,11 +1,11 @@
 {
   "run": {
-    "run_name": "double_neutron",
+    "run_name": "double_charged",
     "simulations": 1000,
     "save_hist": "True"
   },
   "particle": {
-    "type": "neutron",
+    "type": "charged",
     "x": 0,
     "y": 0,
     "z": 0,
@@ -24,8 +24,8 @@
     "k2": 0.01,
     "A1": null,
     "A2": null,
-    "absorption_power1": 0.01,
-    "absorption_power2": 0.01
+    "absorption_power1": 0.03,
+    "absorption_power2": 0.03
   },
   "geometry": {
     "shape": "double_slab",

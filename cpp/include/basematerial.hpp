@@ -14,21 +14,13 @@ class BaseMaterial {
 private:
 
 public:
-    /**
-     * @brief Main constructor.
-     * 
-     * @param lambda Mean free path
-     * @param pabs Absorption probability
-     * @param k Diffusion coefficient
-     * @param atomicMass Atomic mass (default -1.0 if not applicable)
-     * @param stoppingPower Energy loss per unit length (default 0.0)
-     */
+
     BaseMaterial() {};
 
     // Virtual destructor to ensure proper cleanup in derived classes
     virtual ~BaseMaterial() = default;
 
-    // Accessor methods
+    // Accessor methods. They must be implemented in derived classes, depending on whether we have a simple or a composite material.
     virtual double getLambda(const Particle& p) const = 0;
     virtual double getPabs(const Particle& p) const = 0;
     virtual double getK(const Particle& p) const = 0;
