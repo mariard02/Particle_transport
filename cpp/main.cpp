@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
 
             double xinit = 0.0;
             // For slab geometries, get the initial x-boundary for later reflection check
-            if (shape == "regular_slab" || shape == "double_slab") {
+            if (shape == "regular_slab") {
                 if (const RegularSlab* slabPtr = dynamic_cast<const RegularSlab*>(material.get())) {
                     xinit = slabPtr->getXInit();
                 }
@@ -134,6 +134,8 @@ int main(int argc, char* argv[]) {
             }
 
             // First propagation before checking absorption
+            particle->appendHistory();
+            
             particle->propagate(*material);
 
             // Particle loop: propagate until out of bounds or absorbed
@@ -144,8 +146,6 @@ int main(int argc, char* argv[]) {
                 }
                 particle->propagate(*material);
             }
-
-            particle->appendHistory();
 
             // Check if the particle was reflected (escaped through the entry side)
             if (!absorbed && (shape == "regular_slab" || shape == "double_slab")) {

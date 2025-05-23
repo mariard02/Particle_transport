@@ -64,6 +64,33 @@ public:
     /// @return Position of the double slab
     double getXInit() const {return xinit;}
 
+    double getLambda(const Particle& p) const override {
+        if (material1.isWithinBounds(p)) return material1.getLambda(p);
+        else return material2.getLambda(p);
+    }
+
+    double getPabs(const Particle& p) const override {
+        if (material1.isWithinBounds(p)) return material1.getPabs(p);
+        else return material2.getPabs(p);
+    }
+
+    double getK(const Particle& p) const override {
+        if (material1.isWithinBounds(p)) return material1.getK(p);
+        else return material2.getK(p);
+    }
+
+    double getAtomicMass(const Particle& p) const override {
+        if (material1.isWithinBounds(p)) return material1.getAtomicMass(p);
+        else return material2.getAtomicMass(p); }    
+
+    double getStoppingPower(const Particle& p) const override {
+        if (material1.isWithinBounds(p)) return material1.getStoppingPower(p);
+        else return material2.getStoppingPower(p);;}
+        
+    bool hasElasticScattering(const Particle& p) const override {
+        if (material1.isWithinBounds(p)) return material1.getAtomicMass(p) > 0.0;
+        else return material2.getAtomicMass(p)> 0.0;}
+
     /**
      * @brief Check if the particle is within the bounds of the double slab.
      * 

@@ -2,6 +2,7 @@
 #define FINITESLAB_HPP
 
 #include "basematerial.hpp"
+#include "simplematerial.hpp"
 
 /**
  * @brief Represents a finite 3D slab of material with rectangular dimensions.
@@ -9,7 +10,7 @@
  * This class models a bounded volume of material in 3D space. It inherits from BaseMaterial
  * and defines a box-shaped region within which particles may interact with the material.
  */
-class FiniteSlab : public BaseMaterial {
+class FiniteSlab : public SimpleMaterial {
 private:
     double xlength;  ///< Length of the slab along the x-axis
     double ylength;  ///< Length of the slab along the y-axis
@@ -31,7 +32,7 @@ public:
     FiniteSlab(double lambda, double pabs, double k, 
                double xlength, double ylength, double zlength, 
                double stoppingPower = 0.0, double atomicMass = -1.0)
-        : BaseMaterial(lambda, pabs, k, atomicMass, stoppingPower), 
+        : SimpleMaterial(lambda, pabs, k, stoppingPower, atomicMass), 
           xlength(xlength), ylength(ylength), zlength(zlength) {}
 
     /// @return Length of the slab along the x-axis
@@ -44,7 +45,7 @@ public:
     double getZLength() const { return zlength; }
 
     /// Destructor (default)
-    virtual ~FiniteSlab() = default;
+    virtual ~FiniteSlab() = default;    
 
     /**
      * @brief Checks if a particle is within the volume of the slab.

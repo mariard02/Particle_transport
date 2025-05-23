@@ -3,6 +3,7 @@
 
 #include "particle.hpp"
 #include "basematerial.hpp"
+#include "simplematerial.hpp"
 #include "doubleslab.hpp"
 
 /**
@@ -43,6 +44,8 @@ public:
      * @param stepLength Distance traveled in the current step
      */
     void applyEnergyLoss(const BaseMaterial& material, double stepLength);
+
+    double getRandomStepLength(const BaseMaterial&  material);
 
     /**
      * @brief Apply a random scattering to simulate multiple Coulomb scattering.

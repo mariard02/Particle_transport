@@ -19,7 +19,7 @@ double Neutron::getRandomStepLength(const BaseMaterial&  material) {
     int min = 0, max = 1;
     std::uniform_real_distribution<> distrib(min, max);
 
-    return - material.getLambda() * log(distrib(gen));
+    return - material.getLambda(*this) * log(distrib(gen));
 }
 
 std::array<double, 3> Neutron::getThermalStep(const BaseMaterial&  material) {
@@ -42,7 +42,7 @@ std::array<double, 3> Neutron::getThermalStep(const BaseMaterial&  material) {
 }
 
 void Neutron::elasticScatter(const BaseMaterial&  material) {
-    double A = material.getAtomicMass();
+    double A = material.getAtomicMass(*this);
     if (A <= 0) return;
 
     auto angles = getRandomSphericalCoordinates();
@@ -67,7 +67,7 @@ void Neutron::elasticScatter(const BaseMaterial&  material) {
 }
 
 void Neutron::applyDragForce(const BaseMaterial& material) {
-    double k = material.getK();
+    double k = material.getK(*this);
     for (int i = 0; i < 3; ++i) {
         velocity[i] *= (1.0 - k);
     }
@@ -84,7 +84,7 @@ bool Neutron::getAbsorption(const BaseMaterial&  material) const{
        return getAbsorption(*slab);
     }
 
-    return distrib(gen) < material.getPabs();
+    return distrib(gen) < material.getPabs(*this);
 }
 
 bool Neutron::getAbsorption(const DoubleSlab& material) const{
@@ -95,17 +95,15 @@ bool Neutron::getAbsorption(const DoubleSlab& material) const{
     std::uniform_real_distribution<> distrib(min, max);
 
     if (material.getMaterial1().isWithinBounds(*this)) {
-        return distrib(gen) < material.getMaterial1().getPabs();
+        return distrib(gen) < material.getMaterial1().getPabs(*this);
     } else if (material.getMaterial2().isWithinBounds(*this)) {
-        return distrib(gen) < material.getMaterial2().getPabs();
+        return distrib(gen) < material.getMaterial2().getPabs(*this);
     }
 
     return false;
 }
 
 void Neutron::propagate(const BaseMaterial&  material) {
-    
-    appendHistory();
 
     std::array<double, 3> thermalStep = getThermalStep(material);
 
@@ -113,30 +111,27 @@ void Neutron::propagate(const BaseMaterial&  material) {
         propagate(*slab);
         return;
     }
-
+        
     for (int i = 0; i < 3; ++i) {
         position[i] += thermalStep[i] + velocity[i];
     }
 
-    if (material.hasElasticScattering()) {
+    if (material.hasElasticScattering(*this)) {
         elasticScatter(material);
     } else {
         applyDragForce(material);
     }
+
+    appendHistory();
 }
 
 void Neutron::propagate(const DoubleSlab& doubleSlab) {
-    appendHistory();
 
-    double lambda1 = doubleSlab.getMaterial1().getLambda();
-    double lambda2 = doubleSlab.getMaterial2().getLambda();
+    double lambda1 = doubleSlab.getMaterial1().getLambda(*this);
+    double lambda2 = doubleSlab.getMaterial2().getLambda(*this);
     double lambda_min = std::min(lambda1, lambda2);
 
-    double step_length = getRandomStepLength(doubleSlab) * lambda_min;
-
-    for (int i = 0; i < 3; ++i) {
-        position[i] += velocity[i] * step_length;
-    }
+    double step_length = getRandomStepLength(doubleSlab)/doubleSlab.getLambda(*this) * lambda_min; 
 
     bool in_mat1 = doubleSlab.getMaterial1().isWithinBounds(*this);
     bool in_mat2 = doubleSlab.getMaterial2().isWithinBounds(*this);
@@ -165,7 +160,11 @@ void Neutron::propagate(const DoubleSlab& doubleSlab) {
     }
 
     if (distrib(gen) < P_collision && collision_material) {
-        propagate(*collision_material);
+        propagate(*collision_material); // This is what changes the velocity direction and modulus. If it does not enter here, the velocity does not change
+    } else {
+        for (int i = 0; i < 3; ++i) {
+            position[i] += step_length; // Just apply the non thermal velocity to the accepted steps. Otherwise, it is applied more often than it should
+        }
     }
 
 }

@@ -42,9 +42,9 @@ public:
     virtual ~BaseMaterial() = default;
 
     // Accessor methods
-    double getLambda() const { return lambda; }
-    double getPabs() const { return pabs; }
-    double getK() const { return k; }
+    virtual double getLambda(const Particle& p) const = 0;
+    virtual double getPabs(const Particle& p) const = 0;
+    virtual double getK(const Particle& p) const = 0;
 
     /**
      * @brief Check if a given particle is still within the material boundaries.
@@ -61,14 +61,14 @@ public:
      * 
      * @return true if atomic mass > 0
      */
-    bool hasElasticScattering() const { return atomicMass > 0.0; }
+    virtual bool hasElasticScattering(const Particle& p) const = 0;
 
-    double getAtomicMass() const { return atomicMass; }
+    virtual double getAtomicMass(const Particle& p) const = 0;
 
     /**
      * @brief Returns the stopping power (for charged particles).
      */
-    double getStoppingPower() const { return stoppingPower; }
+    virtual double getStoppingPower(const Particle& p) const = 0;
 };
 
 #endif // BASEMATERIAL_HPP
