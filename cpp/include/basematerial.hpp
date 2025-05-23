@@ -11,12 +11,7 @@ class Particle;
  * that can interact with particles. It is meant to be subclassed by concrete material.
  */
 class BaseMaterial {
-protected:
-    double lambda;         ///< Mean free path of the particle in the material
-    double pabs;           ///< Probability of absorption upon interaction
-    double k;              ///< Diffusion coefficient or parameter for Brownian motion
-    double atomicMass;     ///< Atomic mass of the material
-    double stoppingPower;  ///< Energy loss per unit length (relevant for charged particles)
+private:
 
 public:
     /**
@@ -28,15 +23,7 @@ public:
      * @param atomicMass Atomic mass (default -1.0 if not applicable)
      * @param stoppingPower Energy loss per unit length (default 0.0)
      */
-    BaseMaterial(double lambda, double pabs, double k, double atomicMass = -1.0, double stoppingPower = 0.0)
-        : lambda(lambda), pabs(pabs), k(k), atomicMass(atomicMass), stoppingPower(stoppingPower) {}
-
-    /**
-     * @brief Default constructor.
-     * 
-     * Sets all parameters to neutral values. Used for debugging or fallback cases.
-     */
-    BaseMaterial() : lambda(0.0), pabs(0.0), k(0.0), atomicMass(-1.0), stoppingPower(0.0) {}
+    BaseMaterial() {};
 
     // Virtual destructor to ensure proper cleanup in derived classes
     virtual ~BaseMaterial() = default;
