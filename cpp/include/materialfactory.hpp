@@ -23,7 +23,7 @@ public:
     /// Default constructor
     MaterialFactory() {}
 
-    /**
+    /** 
      * @brief Creates a material object based on shape, configuration and whether the particle is charged.
      * 
      * @param config JSON object with configuration values.

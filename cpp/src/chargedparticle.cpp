@@ -82,37 +82,50 @@ bool ChargedParticle::isAbsorbed() const {
     return is_absorbed;
 }
 
-void ChargedParticle::applyMultipleScattering(const BaseMaterial& material){
+void ChargedParticle::elasticScatter(const BaseMaterial& material) {
     double A = material.getAtomicMass(*this);
     if (A <= 0) return;
 
+    double vx = velocity[0], vy = velocity[1], vz = velocity[2];
+    double v_initial = std::sqrt(vx*vx + vy*vy + vz*vz);
+    if (v_initial == 0.0) return;
+
+    double v_cm_x = (mass * vx) / (mass + A);
+    double v_cm_y = (mass * vy) / (mass + A);
+    double v_cm_z = (mass * vz) / (mass + A);
+
+    double v_rel_x = vx - v_cm_x;
+    double v_rel_y = vy - v_cm_y;
+    double v_rel_z = vz - v_cm_z;
+
+    double v_rel = std::sqrt(v_rel_x*v_rel_x + v_rel_y*v_rel_y + v_rel_z*v_rel_z);
+
     auto angles = getRandomSphericalCoordinates();
+    double phi = angles.first;
+    double theta = angles.second;
 
-    float phi = angles.first;
-    float theta = angles.second;
+    double ux = std::sin(theta) * std::cos(phi);
+    double uy = std::sin(theta) * std::sin(phi);
+    double uz = std::cos(theta);
 
-    double ux = sin(theta) * cos(phi);
-    double uy = sin(theta) * sin(phi);
-    double uz = cos(theta);
+    double v_rel_x_new = v_rel * ux;
+    double v_rel_y_new = v_rel * uy;
+    double v_rel_z_new = v_rel * uz;
 
-    double v_initial = sqrt(
-        velocity[0]*velocity[0] +
-        velocity[1]*velocity[1] +
-        velocity[2]*velocity[2]
-    );
+    double v_final_x = v_rel_x_new + v_cm_x;
+    double v_final_y = v_rel_y_new + v_cm_y;
+    double v_final_z = v_rel_z_new + v_cm_z;
 
-    double scale = sqrt((A*A + 1 + 2*A*cos(theta)) / pow(A + 1, 2));
-    double v_final = v_initial * scale;
-
-    velocity = {v_final * ux, v_final * uy, v_final * uz};
+    velocity = {v_final_x, v_final_y, v_final_z};
 }
+
 
 void ChargedParticle::propagate(const BaseMaterial& material) {  
     std::array<double, 3> thermalStep = getThermalStep(material);
 
     double stepLength = sqrt( thermalStep[0] * thermalStep [0] +      
         thermalStep[1] * thermalStep [1] + 
-        thermalStep[2] * thermalStep [2] ); // Not possible to use getTermalStepLenght, it would give a different value.
+        thermalStep[2] * thermalStep [2] ); // Not possible to use getTermalStepLenght, it would generate a different value.
 
     if (const DoubleSlab* slab = dynamic_cast<const DoubleSlab*>(&material)) {
         propagate(*slab);
@@ -124,7 +137,7 @@ void ChargedParticle::propagate(const BaseMaterial& material) {
     }
 
     if (material.hasElasticScattering(*this)) {
-        applyMultipleScattering(material);
+        elasticScatter(material);
     } else {
         applyDragForce(material);
     }

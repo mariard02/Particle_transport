@@ -41,30 +41,47 @@ std::array<double, 3> Neutron::getThermalStep(const BaseMaterial&  material) {
 
 }
 
-void Neutron::elasticScatter(const BaseMaterial&  material) {
+void Neutron::elasticScatter(const BaseMaterial& material) {
     double A = material.getAtomicMass(*this);
     if (A <= 0) return;
 
-    auto angles = getRandomSphericalCoordinates();
+    double vx = velocity[0], vy = velocity[1], vz = velocity[2];
+    double v_initial = std::sqrt(vx*vx + vy*vy + vz*vz);
+    if (v_initial == 0.0) return;  
 
-    float phi = angles.first;
-    float theta = angles.second;
+    double ux0 = vx / v_initial;
+    double uy0 = vy / v_initial;
+    double uz0 = vz / v_initial;
 
-    double ux = sin(theta) * cos(phi);
-    double uy = sin(theta) * sin(phi);
-    double uz = cos(theta);
+    double v_cm_x = vx / (1.0 + A);
+    double v_cm_y = vy / (1.0 + A);
+    double v_cm_z = vz / (1.0 + A);
 
-    double v_initial = sqrt(
-        velocity[0]*velocity[0] +
-        velocity[1]*velocity[1] +
-        velocity[2]*velocity[2]
-    );
+    double v_rel_x = vx - v_cm_x;
+    double v_rel_y = vy - v_cm_y;
+    double v_rel_z = vz - v_cm_z;
 
-    double scale = sqrt((A*A + 1 + 2*A*cos(theta)) / pow(A + 1, 2));
-    double v_final = v_initial * scale;
+    double v_rel = std::sqrt(v_rel_x*v_rel_x + v_rel_y*v_rel_y + v_rel_z*v_rel_z);
 
-    velocity = {v_final * ux, v_final * uy, v_final * uz};
+    auto angles = getRandomSphericalCoordinates(); 
+    double phi = angles.first;
+    double theta = angles.second;
+
+    double ux = std::sin(theta) * std::cos(phi);
+    double uy = std::sin(theta) * std::sin(phi);
+    double uz = std::cos(theta);
+
+    double v_rel_x_new = v_rel * ux;
+    double v_rel_y_new = v_rel * uy;
+    double v_rel_z_new = v_rel * uz;
+
+    double v_final_x = v_rel_x_new + v_cm_x;
+    double v_final_y = v_rel_y_new + v_cm_y;
+    double v_final_z = v_rel_z_new + v_cm_z;
+
+    velocity = {v_final_x, v_final_y, v_final_z};
 }
+
 
 void Neutron::applyDragForce(const BaseMaterial& material) {
     double k = material.getK(*this);

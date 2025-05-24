@@ -54,7 +54,7 @@ public:
      * 
      * @param material Reference to the material
      */
-    void applyMultipleScattering(const BaseMaterial& material);
+    void elasticScatter(const BaseMaterial& material);
 
     /**
      * @brief Compute a thermal (Brownian-like) step based on the material’s diffusion coefficient.

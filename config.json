@@ -1,6 +1,6 @@
 {
   "run": {
-    "run_name": "double_charged",
+    "run_name": "slab_charged",
     "simulations": 1000,
     "save_hist": "True"
   },
@@ -13,26 +13,19 @@
     "vy": 0,
     "vz": 0,
     "charge": 1,
-    "mass": 1
+    "mass": 4
   },
   "material": {
-    "mean_free_path1": 0.5,
-    "mean_free_path2": 0.3,
-    "pabs1": 0.3,
-    "pabs2": 0.01,
-    "k1": 0.01,
-    "k2": 0.01,
-    "A1": null,
-    "A2": null,
-    "absorption_power1": 0.03,
-    "absorption_power2": 0.03
+    "mean_free_path": 0.5,
+    "pabs": 0.1,
+    "k": 0.01,
+    "A": null,
+    "absorption_power": 0.03
   },
   "geometry": {
-    "shape": "double_slab",
-    "total_length": 5,
-    "min_scale": 0.2,
-    "max_scale": 0.8,
-    "scale": 0.5,
+    "shape": "regular_slab",
+    "min_scale": 1,
+    "max_scale": 10,
     "x_init": 0
   }
 }
