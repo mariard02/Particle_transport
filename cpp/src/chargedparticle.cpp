@@ -125,7 +125,7 @@ void ChargedParticle::propagate(const BaseMaterial& material) {
 
     double stepLength = sqrt( thermalStep[0] * thermalStep [0] +      
         thermalStep[1] * thermalStep [1] + 
-        thermalStep[2] * thermalStep [2] ); // Not possible to use getTermalStepLenght, it would generate a different value.
+        thermalStep[2] * thermalStep [2] ); // Not possible to use getTermalStepLenght, it would give a different value.
 
     if (const DoubleSlab* slab = dynamic_cast<const DoubleSlab*>(&material)) {
         propagate(*slab);

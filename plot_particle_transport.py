@@ -138,6 +138,12 @@ class PlotConfig:
         Plots 3D trajectories of neutrons depending on their fate (absorbed, escaped, reflected),
         including the geometry of the simulation domain.
         """
+
+
+        # Helper function to get scale parameter
+        def get_scale(geometry_data):
+            return geometry_data.get('max_scale', geometry_data.get('scale'))
+        
         # Base trajectories: absorbed and escaped
         trayectories = {
             "Absorbed": (f"out/{self.__data['run']['run_name']}/data/hist_absorbed.txt", "red"),
@@ -165,7 +171,7 @@ class PlotConfig:
         if self.__shape == "regular_slab":
             # Plot entrance and exit planes
             x_init = self.__data['geometry'].get('x_init')
-            L = self.__data['geometry'].get('max_scale')
+            L = get_scale(self.__data['geometry'])
             x_end = x_init + L
             y = np.linspace(-10, 10, 2)
             z = np.linspace(-10, 10, 2)
@@ -178,7 +184,7 @@ class PlotConfig:
             # Plot a parallelepiped volume
             x_length = self.__data['geometry'].get('x_length', 1)
             y_length = self.__data['geometry'].get('y_length', 1)
-            z_length = self.__data['geometry'].get('max_scale', 10)
+            z_length = get_scale(self.__data['geometry'])
             x_min, x_max = -x_length/2, x_length/2
             y_min, y_max = -y_length/2, y_length/2
             z_min, z_max = 0, z_length
@@ -207,7 +213,7 @@ class PlotConfig:
 
         elif self.__shape == "sphere":
             # Plot a transparent sphere
-            radius = self.__data['geometry'].get('max_scale', 5)
+            radius = get_scale(self.__data['geometry'])
             u = np.linspace(0, 2 * np.pi, 20)
             v = np.linspace(0, np.pi, 20)
             x = radius * np.outer(np.cos(u), np.sin(v))
@@ -224,7 +230,7 @@ class PlotConfig:
             # Plot 3 planes for two slabs separated by a gap
             x_init = self.__data['geometry'].get('x_init', 0)
             total_length = self.__data['geometry'].get('total_length', 10)
-            L = self.__data['geometry'].get('max_scale', 0.5)  # Ratio for first slab
+            L = get_scale(self.__data['geometry'])  # Ratio for first slab
             x_middle = x_init + total_length * L
             x_end = x_init + total_length
 

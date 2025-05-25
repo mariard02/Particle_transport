@@ -1,26 +1,26 @@
 {
   "run": {
-    "run_name": "slab_charged",
+    "run_name": "slab_neutron",
     "simulations": 1000,
     "save_hist": "True"
   },
   "particle": {
-    "type": "charged",
+    "type": "neutron",
     "x": 0,
     "y": 0,
     "z": 0,
     "vx": 0.5,
     "vy": 0,
     "vz": 0,
-    "charge": 1,
-    "mass": 4
+    "charge": null,
+    "mass": null
   },
   "material": {
     "mean_free_path": 0.5,
     "pabs": 0.1,
     "k": 0.01,
     "A": null,
-    "absorption_power": 0.03
+    "absorption_power": null
   },
   "geometry": {
     "shape": "regular_slab",
